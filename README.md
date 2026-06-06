@@ -67,10 +67,10 @@ Not all methods of these classes mentioned in this readme, it is recommend to ex
 JTUI has **no external dependencies**. Clone the repository and compile with any standard Java toolchain (Java 11+).
 
 ```bash
-git clone https://github.com/your-username/jtui.git
-cd jtui
-javac -d out src/**/*.java
-java -cp out App
+git clone https://github.com/Fadhl0/JTUI.git
+mkdir bin
+javac -d bin App.java
+java -cp bin App
 ```
 
 ---
