@@ -529,13 +529,15 @@ src/
 │   └── TextCell.java
 ├── inputForm/                # Interactive input components
 │   ├── inputTUI/InputTUI.java
-│   ├── InputContainer.java
+│   ├── InputContainer/Input.java
+│   ├── InputType.java
 │   ├── SelectorTUI.java
 │   ├── boxBorder/BoxTUI.java
 │   └── boxShape.java
 ├── Keyhandle/                # Raw mode key event system
 │   ├── OnClick.java
 │   ├── KeyPress.java
+│   ├── KeyHandle.java
 │   └── KeyModifier.java
 ├── Text/                     # ASCII art and image rendering
 │   ├── LogoTUI.java
@@ -552,8 +554,7 @@ src/
     ├── QuoteTUI.java
     ├── TableTUI.java
     ├── TableBox.java
-    ├── Icons.java
-    └── TerminalMetrics.java
+    └── Icons.java
 ```
 
 ---
