@@ -82,13 +82,13 @@ java -cp out App
 The foundation of all text rendering. Supports full ANSI styling via a fluent API.
 
 ```java
-System.out.print(new TextTUI("Red Color\n").setColor(Colors.Error600));
-System.out.print(new TextTUI("Red Background\n").setBackgroundColor(Colors.Error600));
-System.out.print(new TextTUI("Bold\n").bold());
-System.out.print(new TextTUI("Italic\n").italic());
-System.out.print(new TextTUI("Underline\n").underline());
-System.out.print(new TextTUI("Strikethrough\n").strikethrough());
-System.out.print(new TextTUI("Invert\n").invert());
+System.out.println(new TextTUI("Red Color").setColor(Colors.Error600));
+System.out.println(new TextTUI("Red Background").setBackgroundColor(Colors.Error600));
+System.out.println(new TextTUI("Bold").bold());
+System.out.println(new TextTUI("Italic").italic());
+System.out.println(new TextTUI("Underline").underline());
+System.out.println(new TextTUI("Strikethrough").strikethrough());
+System.out.println(new TextTUI("Invert").invert());
 ```
 
 <img width="267" height="210" alt="Pasted image 20260606121627" src="https://github.com/user-attachments/assets/d33d7787-6a45-4444-b58b-80f017329b3b" />
