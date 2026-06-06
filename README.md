@@ -162,6 +162,7 @@ ImageTUI image = new ImageTUI(Paths.get("imgs", "bee.png"))
                      .setSymbol(Icons.CircleSolid.get())
                      .replaceColor("#343341", "#a0a0a0");
 ```
+<img width="221" height="190" alt="image" src="https://github.com/user-attachments/assets/f947bc0c-825c-4fb6-bfd6-edd4eaa423d0" />
 
 ---
 
