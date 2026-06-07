@@ -40,7 +40,7 @@
 
 Originally developed as a Java design patterns course project.
 Not all methods of these classes mentioned in this readme, it is recommend to explore it more in original code.
-
+**Disclaimer**: Automatic terminal resizing is not available on Windows systems at this time.
 ---
 
 ## Features
@@ -68,7 +68,7 @@ JTUI has **no external dependencies**. Clone the repository and compile with any
 
 ```bash
 git clone https://github.com/Fadhl0/JTUI.git
-mkdir bin
+cd JTUI
 javac -d bin App.java
 java -cp bin App
 ```
