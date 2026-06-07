@@ -40,6 +40,7 @@
 
 Originally developed as a Java design patterns course project.
 Not all methods of these classes mentioned in this readme, it is recommend to explore it more in original code.
+
 **Disclaimer**: Automatic terminal resizing is not available on Windows systems at this time.
 ---
 
