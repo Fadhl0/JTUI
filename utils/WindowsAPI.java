@@ -12,7 +12,7 @@ public final class WindowsAPI {
     if (applied.compareAndSet(false, true)) {
       try {
           if (System.getProperty("os.name").contains("Windows")) {
-            new ProcessBuilder("cmd.exe", "/c", "chcp", "65001")
+            new ProcessBuilder("cmd.exe", "/c", "chcp 65001 >NUL 2>&1")
                   .inheritIO()
                   .start()
                   .waitFor();

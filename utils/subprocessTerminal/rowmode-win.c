@@ -8,34 +8,47 @@ static char savedModePath[MAX_PATH];
 static void buildSavedModePath() {
     char tempDir[MAX_PATH];
     if (GetTempPath(MAX_PATH, tempDir) == 0) {
-        // Fallback to cwd if GetTempPath fails
         strcpy(savedModePath, ".rawmode_saved_console");
     } else {
-        // GetTempPath returns a path that already ends with a backslash
         snprintf(savedModePath, MAX_PATH, "%s.rawmode_saved_console", tempDir);
     }
+}
+
+// Always open the real console device, not stdin (which may be a pipe)
+static HANDLE openConsole() {
+    return CreateFile(
+        "CONIN$",
+        GENERIC_READ | GENERIC_WRITE,
+        FILE_SHARE_READ | FILE_SHARE_WRITE,
+        NULL,
+        OPEN_EXISTING,
+        0,
+        NULL
+    );
 }
 
 void enableRawMode() {
     buildSavedModePath();
 
-    HANDLE hInput = GetStdHandle(STD_INPUT_HANDLE);
+    HANDLE hInput = openConsole();
+    if (hInput == INVALID_HANDLE_VALUE) return;
+
     DWORD originalMode;
     if (!GetConsoleMode(hInput, &originalMode)) {
-        fprintf(stderr, "Failed to get console mode\n");
+        CloseHandle(hInput);
         return;
     }
 
+    // Save original
     FILE *f = fopen(savedModePath, "wb");
-    if (f) {
-        fwrite(&originalMode, sizeof(originalMode), 1, f);
-        fclose(f);
-    }
+    if (f) { fwrite(&originalMode, sizeof(originalMode), 1, f); fclose(f); }
 
-    DWORD raw = originalMode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT);
-    if (!SetConsoleMode(hInput, raw)) {
-        fprintf(stderr, "Failed to set raw console mode\n");
-    }
+    DWORD raw = originalMode
+        & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT)
+        |   ENABLE_VIRTUAL_TERMINAL_INPUT;  // <-- THIS makes Windows emit ANSI sequences
+    
+    SetConsoleMode(hInput, raw);
+    CloseHandle(hInput);
 }
 
 void disableRawMode() {
@@ -43,7 +56,7 @@ void disableRawMode() {
 
     FILE *f = fopen(savedModePath, "rb");
     if (!f) {
-        fprintf(stderr, "No saved console mode found\n");
+        fprintf(stderr, "No saved console mode found at: %s\n", savedModePath);
         return;
     }
 
@@ -52,7 +65,14 @@ void disableRawMode() {
     fclose(f);
     remove(savedModePath);
 
-    SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), originalMode);
+    HANDLE hInput = openConsole();
+    if (hInput == INVALID_HANDLE_VALUE) {
+        fprintf(stderr, "Failed to open CONIN$ for restore: %lu\n", GetLastError());
+        return;
+    }
+
+    SetConsoleMode(hInput, originalMode);
+    CloseHandle(hInput);
 }
 
 int main(int argc, char **argv) {
@@ -67,4 +87,3 @@ int main(int argc, char **argv) {
     }
     return 0;
 }
-
