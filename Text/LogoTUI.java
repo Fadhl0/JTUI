@@ -14,6 +14,7 @@ import utils.ANSIformat;
 import utils.Colors;
 import utils.Component;
 import utils.TextTUI;
+import utils.WindowsAPI;
 
 // Text to ASCII
 
@@ -126,16 +127,28 @@ public class LogoTUI {
 
     protected String getFont() {
       try {
-        Path classDir = Path.of(
-          TUIFont.class.getProtectionDomain()
-                      .getCodeSource()
-                      .getLocation()
-                      .toURI()
-        );
-        return classDir.resolve("Text/fonts/" + this.font).normalize().toString();
-      } catch (Exception e) {
-        return Path.of("fonts", this.font).toString();
-      }
+          Path cwd = Path.of(System.getProperty("user.dir"));
+          Path via_cwd = cwd.resolve("Text/fonts/" + this.font).normalize();
+          if (Files.exists(via_cwd)) return via_cwd.toString();
+
+          Path via_parent = cwd.getParent().resolve("Text/fonts/" + this.font).normalize();
+          if (Files.exists(via_parent)) return via_parent.toString();
+      } catch (Exception ignored) {}
+
+      try {
+          Path binDir = Path.of(
+              TUIFont.class.getProtectionDomain()
+                          .getCodeSource()
+                          .getLocation()
+                          .toURI()
+          );
+          Path from_bin = binDir.getParent()
+                                .resolve("Text/fonts/" + this.font)
+                                .normalize();
+          if (Files.exists(from_bin)) return from_bin.toString();
+      } catch (Exception ignored) {}
+
+      return Path.of("Text", "fonts", this.font).toString();
     }
   }
 
@@ -205,6 +218,7 @@ public class LogoTUI {
   }
 
   private String converter() {
+    WindowsAPI.apply();
     String[] texts = this.text.split("\n");
     StringBuilder s = new StringBuilder();
 

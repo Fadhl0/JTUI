@@ -11,6 +11,7 @@ import utils.ANSIformat;
 import utils.Component;
 import utils.Icons;
 import utils.TextTUI;
+import utils.WindowsAPI;
 
 public final class Automation {
 
@@ -112,7 +113,7 @@ public final class Automation {
 
 
   public Automation start() {
-    // Component.enableRawMode();
+    WindowsAPI.apply();
 
     // Title
     if (title != null) {

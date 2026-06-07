@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 
 import inputForm.TUICursor;
 import utils.Component;
+import utils.WindowsAPI;
 
 public class OnClick {
   private static final LinkedHashMap<KeyHandle, Runnable> listeners = new LinkedHashMap<>();
@@ -44,6 +45,7 @@ public class OnClick {
   }
   
   public static void execute() throws Exception {
+    WindowsAPI.apply();
     cancelled = false;
     System.out.print(TUICursor.HIDE_CURSOR);
     System.out.flush();

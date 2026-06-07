@@ -221,6 +221,7 @@ public enum Icons {
   }
 
   public String toString() {
+    WindowsAPI.apply();
     return this.icon;
   }
   /**

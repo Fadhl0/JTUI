@@ -13,6 +13,7 @@ final public class TextTUI {
         this.text.append(text);
     }
     private String text(boolean reset) {
+        WindowsAPI.apply();
         return ANSIformat.format(text.toString(), this.color, getStyleList(), this.backgroundColor, reset);
     }
 

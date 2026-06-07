@@ -38,7 +38,6 @@ public class Component {
         if (System.getProperty("os.name").contains("Windows")) {
             new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
         } else {
-            // new ProcessBuilder("clear").inheritIO().start().waitFor();
             System.out.print("\033[H\033[2J\033[3J");
             System.out.flush();
         }
@@ -47,60 +46,30 @@ public class Component {
         }
     }
 
-    // private static Path getBinaryPath(String name) {
-    //     try {
-    //         Path classDir = Path.of(
-    //             Component.class.getProtectionDomain()
-    //                         .getCodeSource()
-    //                         .getLocation()
-    //                         .toURI()
-    //         );
-    //         return classDir.resolve("subprocessTerminal/" + name).normalize();
-    //     } catch (Exception e) {
-    //         return Path.of("subprocessTerminal", name);
-    //     }
-    // }
-
-    // private static Path getBinaryPath(String name) {
-    //     try {
-    //         // 1. Look relative to Component.class (automatically includes the 'utils' folder)
-    //         java.net.URL resource = Component.class.getResource("subprocessTerminal/" + name);
-            
-    //         if (resource != null) {
-    //             Path binaryPath = Path.of(resource.toURI()).normalize();
-                
-    //             // CRITICAL FOR LINUX: Ensure the binary has execute permissions inside the build folder
-    //             binaryPath.toFile().setExecutable(true);
-    //             return binaryPath;
-    //         }
-    //     } catch (Exception e) {
-    //         e.printStackTrace();
-    //     }
-
-    //     // 2. Fallback: If VS Code failed to copy it to 'bin', look directly in your source folder
-    //     return Path.of("/subprocessTerminal", name).toAbsolutePath();
-    // }
-
     private static Path getBinaryPath(String name) {
+        WindowsAPI.apply();
+
         String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
         boolean isWindows = os.contains("win");
-
         String binaryName = isWindows ? name + ".exe" : name;
+
+        Path resolved = null;
 
         try {
             java.net.URL resource = Component.class.getResource("subprocessTerminal/" + binaryName);
-            
             if (resource != null) {
-                Path binaryPath = Path.of(resource.toURI()).normalize();
-                
-                binaryPath.toFile().setExecutable(true);
-                return binaryPath;
+                resolved = Path.of(resource.toURI()).normalize();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        return Path.of("src", "utils", "subprocessTerminal", binaryName).toAbsolutePath();
+        if (resolved == null) {
+            resolved = Path.of("utils", "subprocessTerminal", binaryName).toAbsolutePath();
+        }
+
+        resolved.toFile().setExecutable(true);   // always called now
+        return resolved;
     }
 
     public static int[] getTerminalSize() {
@@ -240,17 +209,4 @@ public class Component {
         }
     }
 
-
-//   public static int[] getTerminalSize() {
-//     try {
-//         Path path = Path.of("subprocessTerminal", "termsize");
-//         Process p = new ProcessBuilder(path.toAbsolutePath().toString()).start();
-//         String out = new String(p.getInputStream().readAllBytes()).trim();
-//         p.waitFor();
-//         String[] parts = out.split(" ");
-//         return new int[]{Integer.parseInt(parts[0]), Integer.parseInt(parts[1])};
-//     } catch (Exception e) {
-//         return new int[]{24, 80};
-//     }
-//   }
 }

@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 import utils.ANSI;
+import utils.WindowsAPI;
 
 public class ImageTUI {
   private StringBuffer art = new StringBuffer();
@@ -63,6 +64,7 @@ public class ImageTUI {
   }
 
   private void init() {
+    WindowsAPI.apply();
     art.setLength(0);
     try {
       if (path == null) throw new NullPointerException("Failed to find Image!");

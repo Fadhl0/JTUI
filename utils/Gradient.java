@@ -31,6 +31,7 @@ public class Gradient {
    * @return String value
    */
   public static String set(String text, String direction, String... color) {
+    WindowsAPI.apply();
     List<String> colors = Arrays.asList(color);
     return paint(text, direction, colors);
   }

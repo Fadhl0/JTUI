@@ -129,6 +129,7 @@ public class Container {
     }
 
     public void execute() {
+        WindowsAPI.apply();
         System.out.print(TUICursor.HIDE_CURSOR);
         System.out.flush();
 
