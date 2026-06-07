@@ -131,11 +131,13 @@ public class Container {
     public void execute() {
         WindowsAPI.apply();
         System.out.print(TUICursor.HIDE_CURSOR);
+        Component.enableRawMode();
         System.out.flush();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Component.clear();
             System.out.print(TUICursor.SHOW_CURSOR);
+            Component.disableRawMode();
             System.out.flush();
         }));
 
