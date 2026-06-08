@@ -515,7 +515,7 @@ JTUI was designed as a showcase of classical Gang-of-Four and architectural desi
 
 ---
 
-## Project Structure ()
+## Project Structure
 
 ```
 src/
