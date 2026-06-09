@@ -464,27 +464,57 @@ public class App {
     }
 
     private static void tableBoxExample() {
+
+        BarTUI bar1 = new BarTUI()
+                .setCustomIcons("━", "━")
+                .setWidth(20)
+                .setActiveColor(Colors.Error500)
+                .setPercentage(60);;
+                
+        BarTUI bar2 = new BarTUI()
+                .setCustomIcons("█", "█")
+                .setWidth(20)
+                .showPercentage(false)
+                .setPercentage(100);
+        
+        BarTUI bar3 = new BarTUI()
+                .setWidth(5)
+                .setBuffer(1)
+                .showPercentage(false)
+                .setPercentage(26.1);
+
+        TableTUI boxes = new TableTUI()
+                              .addRow(new TextTUI("  Level"), new TextTUI(bar2.toString()), new TextTUI("100.0%"))
+                              .addRow(new TextTUI("  Health"), new TextTUI(bar3.toString()), new TextTUI("26.1%"))
+                              ;
+        
         BoxTUI box = new BoxTUI()
                         .color("#a4f94f")
-                        .label(new TextTUI(" Our Label ").bold().setColor("#bc3030"))
+                        .label(new TextTUI(" Overall Progress ").bold().setColor("#d73030"))
                         .innerText(
-                                new TextTUI("\n")
+                                new TextTUI("\n\n")
                                     .appendText(
-                                        new TextTUI("  Hello everyone! nice to see me! \n")
-                                        .setColor(Colors.Rose500)
+                                        new TextTUI("   All Jobs " + bar1).appendText(new TextTUI(" 0:00:12   ").setColor("657364"))
                                     )
+                                    .appendText(new TextTUI("\n\n"))
                         );
         TableBox tb = new TableBox(
                                 box.responsive(),
                                 new BoxTUI()
-                                    .label(new TextTUI(" Second Box "))
-                                    .innerText(new TextTUI("\n  Hello again! \n").setColor(Colors.Blue500))
+                                    .label(new TextTUI(" " + Icons.OCR.get() + " Power ").setColor("#a4f94f"))
+                                    .innerText(
+                                        new TextTUI("\n")
+                                        .appendText(new TextTUI(boxes.toString()))
+                                        .appendText(new TextTUI("\n"))
+                                        .appendText(new TextTUI("  Charged " + Icons.Bullet.get() + " 0:00 " + Icons.Bullet.get() + " 22W " ))
+                                        .appendText(new TextTUI("\n"))
+                                    ).responsive()
                                     .color("#d73030")
                             );
         
         Container c1 = new Container();
-
         c1.append(tb::build);
+        
         c1.execute();
     }
 
