@@ -25,6 +25,7 @@ import inputForm.boxBorder.BoxTUI;
 import inputForm.inputTUI.InputTUI;
 import utils.AlignText;
 import utils.BadgeTUI;
+import utils.BarTUI;
 import utils.Colors;
 import utils.Component;
 import utils.Container;
