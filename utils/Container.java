@@ -131,7 +131,7 @@ public class Container {
     public void execute() {
         WindowsAPI.apply();
         System.out.print(TUICursor.HIDE_CURSOR);
-        Component.enableRawMode();
+        // Component.enableRawMode();
         System.out.flush();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

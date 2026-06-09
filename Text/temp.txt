@@ -20,12 +20,13 @@ THIS.flf
 The Edge.flf
 https://github.com/xero/figlet-fonts?tab=readme-ov-file
 
+// ─ — – ____‾‾‾
 
 banners
 background in white inside text in black that can change colors
 
 bold text
- ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+ ______________________
 |▓▓▓▓▓▓░░░░░░░░░░░░░░░░| 24.70%
  ‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾
 
