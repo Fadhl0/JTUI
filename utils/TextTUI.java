@@ -3,7 +3,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-final public class TextTUI {
+sealed public class TextTUI permits SmartTextTUI {
     private StringBuffer text = new StringBuffer();
     private String color = "";
     private String backgroundColor = "";
@@ -12,7 +12,7 @@ final public class TextTUI {
     public TextTUI(String text) {
         this.text.append(text);
     }
-    private String text(boolean reset) {
+    protected String text(boolean reset) {
         WindowsAPI.apply();
         return ANSIformat.format(text.toString(), this.color, getStyleList(), this.backgroundColor, reset);
     }

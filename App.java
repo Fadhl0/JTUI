@@ -32,6 +32,7 @@ import utils.Container;
 import utils.Gradient;
 import utils.Icons;
 import utils.QuoteTUI;
+import utils.SmartTextTUI;
 import utils.TableBox;
 import utils.TableTUI;
 import utils.TextTUI;
@@ -52,98 +53,117 @@ public class App {
                                    "Automation", "Container");
 
         int select = opt.prompt();
-        switch (select) {
-            case 0:
-                System.out.println(new BadgeTUI().append(new TextTUI("Text Customization").setColor("#3abdff")));
-                System.out.println();
-                TextTUIExample();
-                break;
-            case 1:
-                System.out.println(new BadgeTUI().append(new TextTUI("All Logo Fonts").setColor("#57ff3a")));
-                System.out.println();
-                LogoFonts();
-                break;
-            case 2:
-                System.out.println(new BadgeTUI().append(new TextTUI("Logo").setColor("#ea3d46"))
-                                                .append(new TextTUI("Colored").setColor("#ffad3a"))
-                                                .append(new TextTUI("Bee").setColor("#96ff3a"))
-                                                .pathway());
-                System.out.println();
-                System.out.println(logoColored());
-                break;
-            case 3:
-                System.out.println(new BadgeTUI().append(new TextTUI("Gradient color").setColor("#ea543d"))
-                                                .append(new TextTUI("Logo").setColor("#ff3aff"))
-                                                .append(new TextTUI("Bee").setColor("#c73aff"))
-                                                .pathway());
-                System.out.println();
-                gradientExample();
-                break;
-            case 4:
-                System.out.println(new BadgeTUI().append(new TextTUI("Image to Text").setColor("#46d9fe")));
-                System.out.println();
-                System.out.println(imageExample());
-                break;
-            case 5:
-                System.out.println(new BadgeTUI().append(new TextTUI("Logo With Image").setColor("#ffffff").setBackgroundColor("#9046fe")));
-                System.out.println();
-                logoWithImage();
-                break;
-            case 6:
-                System.out.println(new BadgeTUI().append(new TextTUI("Box").setColor("#46feb1")));
-                System.out.println();
-                boxExample();
-                break;
-            case 7:
-                System.out.println(new BadgeTUI().append(new TextTUI("Responsive Box").setColor("#210eb1")));
-                System.out.println();
-                responsiveBox();
-                break;
-            case 8:
-                System.out.println(new BadgeTUI().append(new TextTUI("TableBox + BarTUI").setColor("#8d0b59")));
-                System.out.println();
-                tableBoxExample();
-                break;
-            case 9:
-                System.out.println(new BadgeTUI().append(new TextTUI("Input").setColor("#0b578d")));
-                System.out.println();
-                inputExample();
-                break;
-            case 10:
-                System.out.println(new BadgeTUI().append(new TextTUI("Selector").setColor("#8d820b")));
-                System.out.println();
-                selectorExample();
-                break;
-            case 11:
-                System.out.println(new BadgeTUI().append(new TextTUI("Quote").setColor("#032e52")));
-                System.out.println();
-                quoteExample();
-                break;
-            case 12:
-                System.out.println(new BadgeTUI().append(new TextTUI("Click Event").setColor("#ed4318")));
-                System.out.println();
-                clickExample();
-                break;
-            case 13:
-                System.out.println(new BadgeTUI().append(new TextTUI("Tables").setColor("#83bd0d")));
-                System.out.println();
-                tableExample();
-                break;
-            case 14:
-                System.out.println(new BadgeTUI().append(new TextTUI("Align Text").setColor("#bd7a0d")));
-                System.out.println();
-                AlignTextExample();
-                break;
-            case 15:
-                automationExample();
-                break;
-            case 16:
-                ContainerExample();
-                break;
-            default:
-                break;
-        }
+        // switch (select) {
+        //     case 0:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Text Customization").setColor("#3abdff")));
+        //         System.out.println();
+        //         TextTUIExample();
+        //         break;
+        //     case 1:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("All Logo Fonts").setColor("#57ff3a")));
+        //         System.out.println();
+        //         LogoFonts();
+        //         break;
+        //     case 2:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Logo").setColor("#ea3d46"))
+        //                                         .append(new TextTUI("Colored").setColor("#ffad3a"))
+        //                                         .append(new TextTUI("Bee").setColor("#96ff3a"))
+        //                                         .pathway());
+        //         System.out.println();
+        //         System.out.println(logoColored());
+        //         break;
+        //     case 3:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Gradient color").setColor("#ea543d"))
+        //                                         .append(new TextTUI("Logo").setColor("#ff3aff"))
+        //                                         .append(new TextTUI("Bee").setColor("#c73aff"))
+        //                                         .pathway());
+        //         System.out.println();
+        //         gradientExample();
+        //         break;
+        //     case 4:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Image to Text").setColor("#46d9fe")));
+        //         System.out.println();
+        //         System.out.println(imageExample());
+        //         break;
+        //     case 5:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Logo With Image").setColor("#ffffff").setBackgroundColor("#9046fe")));
+        //         System.out.println();
+        //         logoWithImage();
+        //         break;
+        //     case 6:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Box").setColor("#46feb1")));
+        //         System.out.println();
+        //         boxExample();
+        //         break;
+        //     case 7:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Responsive Box").setColor("#210eb1")));
+        //         System.out.println();
+        //         responsiveBox();
+        //         break;
+        //     case 8:
+        //         tableBoxExample();
+        //         break;
+        //     case 9:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Input").setColor("#0b578d")));
+        //         System.out.println();
+        //         inputExample();
+        //         break;
+        //     case 10:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Selector").setColor("#8d820b")));
+        //         System.out.println();
+        //         selectorExample();
+        //         break;
+        //     case 11:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Quote").setColor("#032e52")));
+        //         System.out.println();
+        //         quoteExample();
+        //         break;
+        //     case 12:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Click Event").setColor("#ed4318")));
+        //         System.out.println();
+        //         clickExample();
+        //         break;
+        //     case 13:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Tables").setColor("#83bd0d")));
+        //         System.out.println();
+        //         tableExample();
+        //         break;
+        //     case 14:
+        //         System.out.println(new BadgeTUI().append(new TextTUI("Align Text").setColor("#bd7a0d")));
+        //         System.out.println();
+        //         AlignTextExample();
+        //         break;
+        //     case 15:
+        //         automationExample();
+        //         break;
+        //     case 16:
+        //         ContainerExample();
+        //         break;
+        //     default:
+        //         break;
+        // }
 
+
+        Component.clear();
+        String xml = """
+                <p style=\"Italic Bold\">
+                Hello
+                hi
+                <p>
+                    <span color=\"#f42a2a\">First Span</span>
+                </p>
+                <span>
+                    <p>
+                        <span bg-color=\"#48f42a\">for more Info visit </span>
+                        <a href=\"https://github.com/Fadhl0/JTUI\" color=\"#60ffff\">My Github account</a>
+                    </p>
+                </span>
+                hello again
+                </p>
+                """;
+        TextTUI t = new SmartTextTUI(xml);
+        System.out.println(t);
+        
     }
 
     private static void ContainerExample() {

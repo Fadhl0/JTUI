@@ -1,23 +1,5 @@
 package utils;
 /*
-S: Style
-\u001B[S;38;2;R;G;Bm
-
-22: Bold off
-23: Italic off
-24: Underline off
-25: Blink off
-29: Strikethrough off
-
-256-Color Backgrounds:
-\u001B[48;5;Indexm
-Ex: SoftOrange text on a white background:
-\u001B[38;5;208;48;5;15m
-
-Ex: Bold + Underline + SoftOrange
-\u001B[1;4;38;5;208m
-
-
 Code, Effect
 0, Regular
 1, Bold
@@ -44,7 +26,7 @@ public enum Style {
         this.style = style;
     }
 
-    public int getStyle() { // sealed
+    public int getStyle() {
         return this.style;
     }
 }
