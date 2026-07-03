@@ -147,18 +147,36 @@ public class App {
         Component.clear();
         String xml = """
                 <p style=\"Italic Bold\">
-                Hello
-                hi
+                Hello <br>
+                hi <br>
                 <p>
                     <span color=\"#f42a2a\">First Span</span>
                 </p>
                 <span>
                     <p>
                         <span bg-color=\"#48f42a\">for more Info visit </span>
-                        <a href=\"https://github.com/Fadhl0/JTUI\" color=\"#60ffff\">My Github account</a>
+                        <a href=\"https://github.com/Fadhl0/JTUI\" color=\"#60ffff\">My Github account <span color="#ff5353">(CTRL + Right-click)</span></a>
                     </p>
                 </span>
                 hello again
+
+
+                <ul>
+                    <li>Coffee</li>
+                    <li>
+                        nested:
+                        <ul gap="6" icon="◌">
+                            <li>Black tea</li>
+                            <li>Green tea
+                                <ul gap="9" icon="-">
+                                    <li>China</li>
+                                    <li>Africa</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Milk</li>
+                </ul>
                 </p>
                 """;
         TextTUI t = new SmartTextTUI(xml);
