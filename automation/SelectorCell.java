@@ -1,5 +1,8 @@
 package automation;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import Keyhandle.KeyModifier;
@@ -31,16 +34,40 @@ public class SelectorCell implements Cell {
   private int buffer;
   private int end = 2;
 
+  private int selected = 0;
+  private boolean cancelled = false;
+
+  // private String startCorner;
+  private String endCorner;
+
+  private Map<String, String> list = new LinkedHashMap<>();
+  private String[] descs;
+  private String descColor = "#969696";
+  private int descSpacing;
+
   public SelectorCell() {}
 
-  public SelectorCell options(String[] options) {
-    String[] list = new String[options.length];
-    for (int i = 0; i < list.length; i++) {
-      list[i] = options[i].replaceAll("\n", "");
-    }
-    this.options = list;
+  // public SelectorCell options(String[] options) {
+  //   String[] list = new String[options.length];
+  //   for (int i = 0; i < list.length; i++) {
+  //     list[i] = options[i].replaceAll("\n", "");
+  //   }
+  //   this.options = list;
+  //   return this;
+  // }
+  public SelectorCell add(String option, String description) {
+    option = option.replaceAll("\n", "");
+    description = description.replaceAll("\n", "");
+    list.put(option, description);
     return this;
   }
+
+  public SelectorCell add(String option) {
+    option = option.replaceAll("\n", "");
+    list.put(option, "");
+    return this;
+  }
+
   public SelectorCell setActiveColor(Colors color) {
     activeColor = color.getColor();
     return this;
@@ -55,6 +82,10 @@ public class SelectorCell implements Cell {
   }
   public SelectorCell setInactiveColor(String color) {
     inactiveColor = color;
+    return this;
+  }
+  public SelectorCell setDescriptionColor(String color) {
+    descColor = color;
     return this;
   }
   
@@ -77,6 +108,18 @@ public class SelectorCell implements Cell {
     SelectorCell.run();
   }
 
+  private void init() {
+    if(!list.isEmpty()) {
+      options = list.keySet().toArray(new String[0]);
+      descs = list.values().toArray(new String[0]);
+
+      descSpacing = list.keySet().stream()
+                          .max(Comparator.comparingInt(String::length))
+                          .orElse("")
+                          .length() + 2;
+    }
+  }
+
   private void render(int selected) {
     // System.out.println(prompt + "\r");
     header();
@@ -87,6 +130,8 @@ public class SelectorCell implements Cell {
                             + " ".repeat(buffer)
                             + " " + activeIcon + " "
                             + new TextTUI(options[i]).setColor(activeColor)
+                            + " ".repeat(descSpacing - options[i].length())
+                            + new TextTUI(descs[i]).setColor(descColor)
                             + "\r"
                           );
       }
@@ -96,6 +141,8 @@ public class SelectorCell implements Cell {
                             + " ".repeat(buffer)
                             + " " + inactiveIcon + " "
                             + new TextTUI(options[i]).setColor(inactiveColor)
+                            + " ".repeat(descSpacing - options[i].length())
+                            + new TextTUI(descs[i]).setColor(descColor)
                             + "\r"
                           );
       }
@@ -103,15 +150,14 @@ public class SelectorCell implements Cell {
     System.out.print( activeBorderCell 
                         + " ".repeat(buffer)
                         + "\n"
-                        + new TextTUI("└").setColor(activeBorderCell.getColor())
+                        + new TextTUI(endCorner).setColor(activeBorderCell.getColor())
                       );
     System.out.flush();
   }
 
-  private int selected = 0;
-  private boolean cancelled = false;
-
   public void run() {
+    init();
+
     if(options.length == 0) return;
     
     execute();
@@ -127,20 +173,34 @@ public class SelectorCell implements Cell {
     render(selected);
 
     OnClick.add(KeyPress.Up_Arrow, () -> {
-      if (selected > 0) {
         clearLines(totalLines - 1);
         selected--;
+        selected = selected >= 0 ? selected : options.length-1;
         render(selected);
-      }
     });
 
     OnClick.add(KeyPress.Down_Arrow, () -> {
-      if (selected < options.length - 1) {
         clearLines(totalLines - 1);
         selected++;
+        selected = selected < options.length - 1 ? selected : selected % options.length;
         render(selected);
-      }
     });
+
+    // OnClick.add(KeyPress.Up_Arrow, () -> {
+    //   if (selected > 0) {
+    //     clearLines(totalLines - 1);
+    //     selected--;
+    //     render(selected);
+    //   }
+    // });
+
+    // OnClick.add(KeyPress.Down_Arrow, () -> {
+    //   if (selected < options.length - 1) {
+    //     clearLines(totalLines - 1);
+    //     selected++;
+    //     render(selected);
+    //   }
+    // });
 
     OnClick.add(KeyModifier.CTRL.with('c'), () -> {
       System.out.print(TUICursor.SHOW_CURSOR);
@@ -191,7 +251,7 @@ public class SelectorCell implements Cell {
   }
   public int getHeight() {
     int one = prompt.split("\n", -1).length;
-    int two = options.length;
+    int two = list.size();
     return one + two + end;
   }
 
@@ -226,5 +286,12 @@ public class SelectorCell implements Cell {
 
   public String getId() {
     return "<Selector>";
+  }
+
+  @Override
+  public SelectorCell roundCorners(boolean isRound) {
+    // startCorner = isRound ? "╭": "┌";
+    endCorner = isRound ? "╰": "└";
+    return this;
   }
 }

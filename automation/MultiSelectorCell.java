@@ -1,7 +1,10 @@
 package automation;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import Keyhandle.KeyModifier;
@@ -21,7 +24,9 @@ public class MultiSelectorCell implements Cell {
   private TextTUI activeIcon = new TextTUI(Icons.Squere.get()).setColor("#4dcbf0");
   private TextTUI inactiveIcon = new TextTUI(Icons.Squere.get()).setColor("#969696");
   private TextTUI submitIcon = new TextTUI(Icons.CircleSolid.get()).setColor("#969696");
+  private Map<String, String> list = new LinkedHashMap<>();
   private String[] options;
+  private String[] descs;
   private String prompt = "";
   private Consumer<List<Integer>> onSubmitCallback;
   private List<Integer> variable;
@@ -36,16 +41,37 @@ public class MultiSelectorCell implements Cell {
   private int buffer;
   private int end = 2;
 
+  private String descColor = "#969696";
+  private int descSpacing;
+
+  // private String startCorner;
+  private String endCorner;
+
   public MultiSelectorCell() {}
 
-  public MultiSelectorCell options(String[] options) {
-    String[] list = new String[options.length];
-    for (int i = 0; i < list.length; i++) {
-      list[i] = options[i].replaceAll("\n", "");
-    }
-    this.options = list;
+  // public MultiSelectorCell options(String[] options) {
+  //   String[] list = new String[options.length];
+  //   for (int i = 0; i < list.length; i++) {
+  //     list[i] = options[i].replaceAll("\n", "");
+  //   }
+  //   this.options = list;
+  //   return this;
+  // }
+
+  public MultiSelectorCell add(String option, String description) {
+    option = option.replaceAll("\n", "");
+    description = description.replaceAll("\n", "");
+    list.put(option, description);
     return this;
   }
+
+  public MultiSelectorCell add(String option) {
+    option = option.replaceAll("\n", "");
+    list.put(option, "");
+    return this;
+  }
+
+
   public MultiSelectorCell setActiveColor(Colors color) {
     activeColor = color.getColor();
     return this;
@@ -60,6 +86,14 @@ public class MultiSelectorCell implements Cell {
   }
   public MultiSelectorCell setInactiveColor(String color) {
     inactiveColor = color;
+    return this;
+  }
+  public MultiSelectorCell setDescriptionColor(Colors color) {
+    descColor = color.getColor();
+    return this;
+  }
+  public MultiSelectorCell setDescriptionColor(String color) {
+    descColor = color;
     return this;
   }
   public MultiSelectorCell setSubmitColor(Colors color) {
@@ -90,6 +124,18 @@ public class MultiSelectorCell implements Cell {
     cell.run();
   }
 
+  private void init() {
+    if(!list.isEmpty()) {
+      options = list.keySet().toArray(new String[0]);
+      descs = list.values().toArray(new String[0]);
+
+      descSpacing = list.keySet().stream()
+                          .max(Comparator.comparingInt(String::length))
+                          .orElse("")
+                          .length() + 2;
+    }
+  }
+
   private void render(int hover) {
     header();
     for (int i = 0; i < options.length; i++) {
@@ -113,6 +159,8 @@ public class MultiSelectorCell implements Cell {
                           + " ".repeat(buffer)
                           + " " + icon + " "
                           + new TextTUI(options[i]).setColor(color)
+                          + " ".repeat(descSpacing - options[i].length())
+                          + new TextTUI(descs[i]).setColor(descColor)
                           + "\r"
                         );
     }
@@ -120,7 +168,7 @@ public class MultiSelectorCell implements Cell {
                       activeBorderCell 
                       + " ".repeat(buffer)
                       + "\n"
-                      + new TextTUI("└").setColor(activeBorderCell.getColor())
+                      + new TextTUI(endCorner).setColor(activeBorderCell.getColor())
                     );
     System.out.flush();
   }
@@ -137,6 +185,8 @@ public class MultiSelectorCell implements Cell {
   }
 
   public void run() {
+    init();
+
     if(options.length == 0) return;
     
     execute();
@@ -152,20 +202,34 @@ public class MultiSelectorCell implements Cell {
     render(hover);
 
     OnClick.add(KeyPress.Up_Arrow, () -> {
-      if (hover > 0) {
         clearLines(totalLines - 1);
         hover--;
+        hover = hover >= 0 ? hover : options.length-1;
         render(hover);
-      }
     });
 
     OnClick.add(KeyPress.Down_Arrow, () -> {
-      if (hover < options.length - 1) {
         clearLines(totalLines - 1);
         hover++;
+        hover = hover < options.length - 1 ? hover : hover % options.length;
         render(hover);
-      }
     });
+
+    // OnClick.add(KeyPress.Up_Arrow, () -> {
+    //   if (hover > 0) {
+    //     clearLines(totalLines - 1);
+    //     hover--;
+    //     render(hover);
+    //   }
+    // });
+
+    // OnClick.add(KeyPress.Down_Arrow, () -> {
+    //   if (hover < options.length - 1) {
+    //     clearLines(totalLines - 1);
+    //     hover++;
+    //     render(hover);
+    //   }
+    // });
 
     OnClick.add(KeyModifier.CTRL.with('c'), () -> {
       System.out.print(TUICursor.SHOW_CURSOR);
@@ -232,7 +296,7 @@ public class MultiSelectorCell implements Cell {
   }
   public int getHeight() {
     int one = prompt.split("\n", -1).length;
-    int two = options.length;
+    int two = list.size();
     return one + two + end;
   }
 
@@ -273,6 +337,13 @@ public class MultiSelectorCell implements Cell {
 
   public String getId() {
     return "<Multi-Selector>";
+  }
+
+  @Override
+  public MultiSelectorCell roundCorners(boolean isRound) {
+    // startCorner = isRound ? "╭": "┌";
+    endCorner = isRound ? "╰": "└";
+    return this;
   }
 
 }

@@ -13,4 +13,5 @@ public interface Cell {
   Cell setActiveIcon(TextTUI icon);
   Cell setInactiveIcon(TextTUI icon);
   Cell setBuffer(int buffer);
+  Cell roundCorners(boolean isRound);
 }

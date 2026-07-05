@@ -26,15 +26,16 @@ public class InputCell implements Cell {
 
   private String warningColor = "#f3eb67";
   private String warningIcon  = Icons.Tringle.get();
+  // private String startCorner;
+  private String endCorner;
 
-  TextTUI lastBorder = new TextTUI("\n└");
   private InputTUI input = new InputTUI()
                               .shape(boxShape.None)
                               .setAppendText(
                                 () -> new TextTUI("\n")
                                           .appendText(activeBorder)
                                           .appendText(
-                                            lastBorder.setColor(activeBorder.getColor())
+                                            new TextTUI("\n"+endCorner).setColor(activeBorder.getColor())
                                           )
                                           .appendText(new TextTUI(" ".repeat(buffer)))
                               );
@@ -167,7 +168,7 @@ public class InputCell implements Cell {
   }
   public int getHeight() {
     int len1 = prompt.split("\n", -1).length;
-    return len1 + 3; // 2 is for lastBorder 
+    return len1 + 3; // 2 is for endCorner 
   }
 
   public InputCell setBuffer(int buffer) {
@@ -194,5 +195,12 @@ public class InputCell implements Cell {
 
   public String getId() {
     return "<Input>";
+  }
+
+  @Override
+  public InputCell roundCorners(boolean isRound) {
+    // startCorner = isRound ? "╭": "┌";
+    endCorner = isRound ? "╰": "└";
+    return this;
   }
 }

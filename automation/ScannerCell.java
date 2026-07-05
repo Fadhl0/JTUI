@@ -187,5 +187,10 @@ public class ScannerCell implements Cell {
     inactiveIcon = icon;
     return this;
   }
+
+  @Override
+  public Cell roundCorners(boolean isRound) {
+    return this;
+  }
   
 }

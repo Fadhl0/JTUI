@@ -30,10 +30,6 @@ public class BoxCell implements Cell {
     this.text = text;
     return this;
   }
-  public BoxCell roundCorners(boolean isRound) {
-    this.isRound = isRound;
-    return this;
-  }
 
   private String createBox() {
     String space = " ".repeat(buffer);
@@ -112,6 +108,11 @@ public class BoxCell implements Cell {
   @Override
   public BoxCell setBuffer(int buffer) {
     this.buffer = buffer;
+    return this;
+  }
+  @Override
+  public BoxCell roundCorners(boolean isRound) {
+    this.isRound = isRound;
     return this;
   }
   

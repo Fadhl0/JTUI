@@ -23,7 +23,8 @@ class AutomationRunner {
                     .setInactiveBorder(instance.getBorder()[1])
                     .setActiveIcon(instance.getIcon()[0])
                     .setInactiveIcon(instance.getIcon()[1])
-                    .setBuffer(instance.getBuffer());
+                    .setBuffer(instance.getBuffer())
+                    .roundCorners(instance.isRound());
                 
                 c = cell;
                 cell.run();   // blocking method

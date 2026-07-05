@@ -25,7 +25,9 @@ public final class Automation {
   private TextTUI error = new TextTUI("Operation Failed.").setColor("#a90000");
   private TextTUI cancel = new TextTUI("Operation Cancelled.").setColor("#a90000");
   private TextTUI errIcon = new TextTUI(Icons.SquereSolid.get()).setColor("#a90000");
-
+  private String startCorner = "┌";
+  private String endCorner = "└";
+  private boolean isRound = false;
 
   private Automation() {}
   public static Automation create() {
@@ -39,6 +41,13 @@ public final class Automation {
   }
   public Automation appendCell(Cell cell) { 
     cells.add(cell);
+    return this;
+  }
+
+  public Automation roundCorner(){
+    startCorner = "╭";
+    endCorner = "╰";
+    isRound = true;
     return this;
   }
 
@@ -63,6 +72,9 @@ public final class Automation {
     TextTUI newTitle = new TextTUI(title.toString().replaceAll("\n", ""));
     this.title = newTitle;
     return this;
+  }
+  public boolean isRound() {
+    return isRound;
   }
   public Automation setErrorIcon(TextTUI icon) {
     TextTUI newIcon = new TextTUI(icon.toString().replaceAll("\n", ""));
@@ -102,7 +114,7 @@ public final class Automation {
     // Title
     if (title != null) {
       System.out.println(
-          new TextTUI("┌" + " ".repeat(buffer))
+          new TextTUI(startCorner + " ".repeat(buffer))
                       .setColor(inactiveBorderColor.getColor())
                       .appendText(title)
                       .appendText(new TextTUI("\n"))
@@ -119,7 +131,7 @@ public final class Automation {
                         inactiveBorderColor 
                         + " ".repeat(buffer)
                         + "\n"
-                        + new TextTUI("└").setColor(inactiveBorderColor.getColor())
+                        + new TextTUI(endCorner).setColor(inactiveBorderColor.getColor())
                       );
     }
     System.out.print(TUICursor.SHOW_CURSOR);

@@ -617,4 +617,9 @@ public class SpinnerCell implements Cell {
 		inactiveIcon = icon;
 		return this;
 	}
+
+	@Override
+	public SpinnerCell roundCorners(boolean isRound) {
+		return this;
+	}
 }

@@ -1,7 +1,11 @@
 package inputForm;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
+import Keyhandle.KeyHandle;
 import Keyhandle.KeyModifier;
 import Keyhandle.KeyPress;
 import Keyhandle.OnClick;
@@ -24,15 +28,40 @@ public class SelectorTUI {
   private boolean clear = false;
   private int buffer = 2;
 
+  private boolean   startActive  = true;
+  private boolean   active       = true;
+  private char      start        = '1';
+  private KeyHandle stop         = KeyPress.Escape;
+
+  private Map<String, String> list = new LinkedHashMap<>();
+  private String[] descs;
+  private String descColor = "#969696";
+  private int descSpacing;
+
   public SelectorTUI() {}
-  public SelectorTUI options(String... options) {
-    String[] list = new String[options.length];
-    for (int i = 0; i < list.length; i++) {
-      list[i] = options[i].replaceAll("\n", "");
-    }
-    this.options = list;
+
+
+  // public SelectorTUI options(String... options) {
+  //   String[] list = new String[options.length];
+  //   for (int i = 0; i < list.length; i++) {
+  //     list[i] = options[i].replaceAll("\n", "");
+  //   }
+  //   this.options = list;
+  //   return this;
+  // }
+
+  public SelectorTUI add(String option, String description) {
+    option = option.replaceAll("\n", "");
+    description = description.replaceAll("\n", "");
+    list.put(option, description);
     return this;
   }
+  public SelectorTUI add(String option) {
+    option = option.replaceAll("\n", "");
+    list.put(option, "");
+    return this;
+  }
+
   public SelectorTUI setActiveColor(Colors color) {
     activeColor = color.getColor();
     return this;
@@ -49,9 +78,27 @@ public class SelectorTUI {
     inactiveColor = color;
     return this;
   }
+  public SelectorTUI setDescriptionColor(String color) {
+    descColor = color;
+    return this;
+  }
   
   public SelectorTUI onSubmit(Consumer<Integer> set) {
     this.onSubmitCallback = set;
+    return this;
+  }
+
+  public SelectorTUI startKey(char key) {
+    this.start = key;
+    return this;
+  }
+  public SelectorTUI stopKey(KeyHandle key) {
+    this.stop = key;
+    return this;
+  }
+  public SelectorTUI startActive(boolean active) {
+    this.active = active;
+    startActive = active;
     return this;
   }
 
@@ -67,6 +114,8 @@ public class SelectorTUI {
                             " ".repeat(buffer)
                             + " " + activeIcon + " "
                             + new TextTUI(options[i]).setColor(activeColor)
+                            + " ".repeat(descSpacing - options[i].length())
+                            + new TextTUI(descs[i]).setColor(descColor)
                             + "\r"
                           );
       }
@@ -75,6 +124,8 @@ public class SelectorTUI {
                             " ".repeat(buffer)
                             + " " + inactiveIcon + " "
                             + new TextTUI(options[i]).setColor(inactiveColor)
+                            + " ".repeat(descSpacing - options[i].length())
+                            + new TextTUI(descs[i]).setColor(descColor)
                             + "\r"
                           );
       }
@@ -85,7 +136,20 @@ public class SelectorTUI {
   private int selected = 0;
   private boolean cancelled = false;
 
+  private void init() {
+    if(!list.isEmpty()) {
+      options = list.keySet().toArray(new String[0]);
+      descs = list.values().toArray(new String[0]);
+
+      descSpacing = list.keySet().stream()
+                          .max(Comparator.comparingInt(String::length))
+                          .orElse("")
+                          .length() + 2;
+    }
+  }
+
   public int prompt() {
+    init();
     int result = execute();
     
     if (onSubmitCallback != null) onSubmitCallback.accept(variable);
@@ -96,38 +160,59 @@ public class SelectorTUI {
   private int execute() {
     OnClick.reset();
     int totalLines = options.length + 1;
-    selected = 0;
+    selected = active ? 0 : -1;
 
     render(selected);
 
     OnClick.add(KeyPress.Up_Arrow, () -> {
-      if (selected > 0) {
+      if (active) {
         clearLines(totalLines);
         selected--;
+        selected = selected >= 0 ? selected : options.length-1;
         render(selected);
       }
     });
 
     OnClick.add(KeyPress.Down_Arrow, () -> {
-      if (selected < options.length - 1) {
+      if (active) {
         clearLines(totalLines);
         selected++;
+        selected = selected < options.length - 1 ? selected : selected % options.length;
         render(selected);
       }
     });
 
-    OnClick.add(KeyModifier.CTRL.with('c'), () -> {
-      cancelled = true;
-      OnClick.cancel();
+    OnClick.add(KeyPress.Enter, () -> {
+      if(active) {
+        if (clear) clearLines(totalLines); // clear option after select
+        System.out.flush();
+        OnClick.cancel();
+      }
     });
 
-    OnClick.add(KeyPress.Enter, () -> {
-      if (clear) clearLines(totalLines); // clear option after select
+    if(!startActive) {
+      OnClick.add(stop, () -> {
+        if (active) {
+          active = false;
+          clearLines(totalLines);
+          render(-1);
+        }
+      });
+  
+      OnClick.TypingReturn((c) -> {
+        if (!active) {
+          if (c == start) {
+            active = true;
+            clearLines(totalLines);
+            selected = selected == -1 ? 0 : selected;
+            render(selected);
+          }
+        }
+      });
+    }
 
-      // System.out.println(prompt + " " + new TextTUI(options[selected]).setColor(activeIcon.getColor()));
-      // lastMessage(options[selected]);
-      
-      System.out.flush();
+    OnClick.add(KeyModifier.CTRL.with('c'), () -> {
+      cancelled = true;
       OnClick.cancel();
     });
 

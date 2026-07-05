@@ -84,4 +84,9 @@ public class TextCell implements Cell {
     inactiveBorder = border;
     return this;
   }
+
+  @Override
+  public TextCell roundCorners(boolean isRound) {
+    return this;
+  }
 }
