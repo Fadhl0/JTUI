@@ -2,12 +2,8 @@ package automation;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import inputForm.TUICursor;
-import inputForm.boxShape;
-import inputForm.boxBorder.BoxTUI;
-import utils.ANSIformat;
 import utils.Component;
 import utils.Icons;
 import utils.TextTUI;
@@ -16,9 +12,6 @@ import utils.WindowsAPI;
 public final class Automation {
 
   private TextTUI title;
-  private TextTUI summaryLabel;
-  private Supplier<TextTUI> summaryText;
-
 
   private final List<Cell> cells = new ArrayList<>();
 
@@ -46,12 +39,6 @@ public final class Automation {
   }
   public Automation appendCell(Cell cell) { 
     cells.add(cell);
-    return this;
-  }
-  public Automation summary(TextTUI label, Supplier<TextTUI> text) {
-    TextTUI newLabel = new TextTUI(label.toString().replaceAll("\n", ""));
-    summaryLabel = newLabel;
-    summaryText = text;
     return this;
   }
 
@@ -98,9 +85,6 @@ public final class Automation {
   public int getBuffer() {
     return buffer;
   }
-  public TextTUI getSummary() {
-    return summaryText.get();
-  }
   public TextTUI getErrorMsg() {
     return error;
   }
@@ -129,49 +113,18 @@ public final class Automation {
     // Cells
     AutomationRunner.run(cells, this);
 
-    //summery
-    if(summaryText != null && !summaryText.get().isEmpty() && !stop) {
-      System.out.print(boxSummery());
-    }
-
     // ending
     if(!cells.isEmpty() && !stop) {
-      System.out.print( inactiveBorderColor 
-                          + " ".repeat(buffer)
-                          + "\n"
-                          + new TextTUI("└").setColor(inactiveBorderColor.getColor())
-                        );
+      System.out.print( 
+                        inactiveBorderColor 
+                        + " ".repeat(buffer)
+                        + "\n"
+                        + new TextTUI("└").setColor(inactiveBorderColor.getColor())
+                      );
     }
     System.out.print(TUICursor.SHOW_CURSOR);
     Component.disableRawMode();
     return this;
-  }
-
-  private String boxSummery() {
-    String space = " ".repeat(buffer);
-    String styling = ANSIformat.format("", summaryText.get().getColor(), false);
-    String orgnizeText = space + summaryText.get().toString().replaceAll("\n", "\n" + space + styling);
-
-    BoxTUI box = new BoxTUI()
-                .innerText(new TextTUI(orgnizeText))
-                .shape(boxShape.SharpCornerLine)
-                .color(inactiveBorderColor.getColor())
-                .label(summaryLabel);
-    
-    String[] boxRows = box.build().split("\n");
-    StringBuilder sb = new StringBuilder();
-
-    TextTUI border = new TextTUI("├").setColor(inactiveBorderColor.getColor());
-    sb.append(inactiveBorderColor.toString()).append("\n");
-
-    for (int i = 0; i < boxRows.length; i++) {
-      if(i == 0 || i == boxRows.length - 1) {
-        boxRows[i] = border.toString()
-                     + Component.visibleSubstring(boxRows[i], 1, Component.visibleLength(boxRows[i]));
-      }
-      sb.append(boxRows[i]).append("\n");
-    }
-    return sb.toString();
   }
 
   private static boolean stop = false;
