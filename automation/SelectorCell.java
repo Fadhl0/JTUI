@@ -1,101 +1,36 @@
 package automation;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import Keyhandle.KeyModifier;
 import Keyhandle.KeyPress;
 import Keyhandle.OnClick;
 import inputForm.TUICursor;
-import utils.Colors;
+import inputForm.BaseSelector;
 import utils.Component;
-import utils.Icons;
 import utils.TextTUI;
 
-public class SelectorCell implements Cell {
+public class SelectorCell extends BaseSelector<SelectorCell> implements Cell {
 
-  private int limitOptions = -1; // -1 display all options
-
-  private TextTUI activeIcon = new TextTUI(Icons.CircleSolid.get()).setColor("#2c9a1d");
-  private TextTUI inactiveIcon = new TextTUI(Icons.CircleDotted.get()).setColor("#969696");
-  private String[] options;
-  private String prompt = "";
   private Consumer<Integer> onSubmitCallback;
   private int variable;
-  private String activeColor = "#ffffff";
-  private String inactiveColor = "#969696";
 
   private TextTUI activeBorderCell   = new TextTUI("");
   private TextTUI inactiveBorderCell = new TextTUI("");
   private TextTUI activeIconCell     = new TextTUI("");
   private TextTUI inactiveIconCell   = new TextTUI("");
-  private int buffer;
   private int end = 2;
 
   private int selected = 0;
   private boolean cancelled = false;
 
-  // private String startCorner;
   private String endCorner;
 
-  private Map<String, String> list = new LinkedHashMap<>();
-  private String[] descs;
-  private String descColor = "#969696";
-  private int descSpacing;
-
   public SelectorCell() {}
-
-  // public SelectorCell options(String[] options) {
-  //   String[] list = new String[options.length];
-  //   for (int i = 0; i < list.length; i++) {
-  //     list[i] = options[i].replaceAll("\n", "");
-  //   }
-  //   this.options = list;
-  //   return this;
-  // }
-  public SelectorCell add(String option, String description) {
-    option = option.replaceAll("\n", "");
-    description = description.replaceAll("\n", "");
-    list.put(option, description);
-    return this;
-  }
-
-  public SelectorCell add(String option) {
-    option = option.replaceAll("\n", "");
-    list.put(option, "");
-    return this;
-  }
-
-  public SelectorCell setActiveColor(Colors color) {
-    activeColor = color.getColor();
-    return this;
-  }
-  public SelectorCell setActiveColor(String color) {
-    activeColor = color;
-    return this;
-  }
-  public SelectorCell setInactiveColor(Colors color) {
-    inactiveColor = color.getColor();
-    return this;
-  }
-  public SelectorCell setInactiveColor(String color) {
-    inactiveColor = color;
-    return this;
-  }
-  public SelectorCell setDescriptionColor(String color) {
-    descColor = color;
-    return this;
-  }
   
   public SelectorCell onSubmit(Consumer<Integer> set) {
     this.onSubmitCallback = set;
     return this;
-  }
-
-  private void clearLines(int n) {
-    for (int i = 0; i < n; i++) System.out.print(TUICursor.CURSOR_UP.toString() + TUICursor.CLEAR_LINE.toString());
   }
   
   private void header() {
@@ -108,30 +43,24 @@ public class SelectorCell implements Cell {
     SelectorCell.run();
   }
 
-  private void init() {
-    if(!list.isEmpty()) {
-      options = list.keySet().toArray(new String[0]);
-      descs = list.values().toArray(new String[0]);
-
-      descSpacing = list.keySet().stream()
-                          .max(Comparator.comparingInt(String::length))
-                          .orElse("")
-                          .length() + 2;
-    }
-  }
-
   private void render(int selected) {
-    // System.out.println(prompt + "\r");
     header();
-    for (int i = 0; i < options.length; i++) {
+
+    int[] capacity = options.window(selected);
+
+    for (int i = capacity[0]; i < capacity[1]; i++) {
+      String option = options.options()[i];
+      String desc = options.descs()[i];
+      int descSpace = options.descSpacing();
+
       if (i == selected) {
         System.out.println( 
                             activeBorderCell
                             + " ".repeat(buffer)
                             + " " + activeIcon + " "
-                            + new TextTUI(options[i]).setColor(activeColor)
-                            + " ".repeat(descSpacing - options[i].length())
-                            + new TextTUI(descs[i]).setColor(descColor)
+                            + new TextTUI(option).setColor(activeColor)
+                            + " ".repeat(descSpace - option.length())
+                            + new TextTUI(desc).setColor(descColor)
                             + "\r"
                           );
       }
@@ -140,9 +69,9 @@ public class SelectorCell implements Cell {
                             activeBorderCell
                             + " ".repeat(buffer)
                             + " " + inactiveIcon + " "
-                            + new TextTUI(options[i]).setColor(inactiveColor)
-                            + " ".repeat(descSpacing - options[i].length())
-                            + new TextTUI(descs[i]).setColor(descColor)
+                            + new TextTUI(option).setColor(inactiveColor)
+                            + " ".repeat(descSpace - option.length())
+                            + new TextTUI(desc).setColor(descColor)
                             + "\r"
                           );
       }
@@ -156,9 +85,11 @@ public class SelectorCell implements Cell {
   }
 
   public void run() {
-    init();
+    options.init();
 
-    if(options.length == 0) return;
+    int listSize = options.options().length;
+
+    if(listSize == 0) return;
     
     execute();
     
@@ -173,34 +104,18 @@ public class SelectorCell implements Cell {
     render(selected);
 
     OnClick.add(KeyPress.Up_Arrow, () -> {
-        clearLines(totalLines - 1);
+        options.clearLines(totalLines - 1);
         selected--;
-        selected = selected >= 0 ? selected : options.length-1;
+        selected = selected >= 0 ? selected : options.size()-1;
         render(selected);
     });
 
     OnClick.add(KeyPress.Down_Arrow, () -> {
-        clearLines(totalLines - 1);
+        options.clearLines(totalLines - 1);
         selected++;
-        selected = selected < options.length - 1 ? selected : selected % options.length;
+        selected = selected < options.size() - 1 ? selected : selected % options.size();
         render(selected);
     });
-
-    // OnClick.add(KeyPress.Up_Arrow, () -> {
-    //   if (selected > 0) {
-    //     clearLines(totalLines - 1);
-    //     selected--;
-    //     render(selected);
-    //   }
-    // });
-
-    // OnClick.add(KeyPress.Down_Arrow, () -> {
-    //   if (selected < options.length - 1) {
-    //     clearLines(totalLines - 1);
-    //     selected++;
-    //     render(selected);
-    //   }
-    // });
 
     OnClick.add(KeyModifier.CTRL.with('c'), () -> {
       System.out.print(TUICursor.SHOW_CURSOR);
@@ -210,10 +125,9 @@ public class SelectorCell implements Cell {
     });
 
     OnClick.add(KeyPress.Enter, () -> {
-      clearLines(totalLines - 1); // clear option after select
+      options.clearLines(totalLines - 1); // clear option after select
 
-      // System.out.println(prompt + " " + new TextTUI(options[selected]).setColor(activeIcon.getColor()));
-      lastMessage(options[selected]);
+      lastMessage(options.options()[selected]);
       
       System.out.flush();
       System.out.print("\033[J"); // clear all text bottom
@@ -251,7 +165,7 @@ public class SelectorCell implements Cell {
   }
   public int getHeight() {
     int one = prompt.split("\n", -1).length;
-    int two = list.size();
+    int two = options.getRowsLength();
     return one + two + end;
   }
 

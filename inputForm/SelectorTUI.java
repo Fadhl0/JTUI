@@ -1,87 +1,29 @@
 package inputForm;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 import Keyhandle.KeyHandle;
 import Keyhandle.KeyModifier;
 import Keyhandle.KeyPress;
 import Keyhandle.OnClick;
-import utils.Colors;
-import utils.Icons;
 import utils.TextTUI;
 
-public class SelectorTUI {
-
-  private int limitOptions = -1; // TODO: -1 display all options
-
-  private TextTUI activeIcon = new TextTUI(Icons.CircleSolid.get()).setColor("#2c9a1d");
-  private TextTUI inactiveIcon = new TextTUI(Icons.CircleDotted.get()).setColor("#969696");
-  private String[] options;
-  private String prompt;
+public class SelectorTUI extends BaseSelector<SelectorTUI> {
+  
   private Consumer<Integer> onSubmitCallback;
   private int variable;
-  private String activeColor = "#ffffff";
-  private String inactiveColor = "#969696";
+
   private boolean clear = false;
-  private int buffer = 2;
 
   private boolean   startActive  = true;
   private boolean   active       = true;
   private char      start        = '1';
   private KeyHandle stop         = KeyPress.Escape;
 
-  private Map<String, String> list = new LinkedHashMap<>();
-  private String[] descs;
-  private String descColor = "#969696";
-  private int descSpacing;
+  private int selected = 0;
+  private boolean cancelled = false;
 
   public SelectorTUI() {}
-
-
-  // public SelectorTUI options(String... options) {
-  //   String[] list = new String[options.length];
-  //   for (int i = 0; i < list.length; i++) {
-  //     list[i] = options[i].replaceAll("\n", "");
-  //   }
-  //   this.options = list;
-  //   return this;
-  // }
-
-  public SelectorTUI add(String option, String description) {
-    option = option.replaceAll("\n", "");
-    description = description.replaceAll("\n", "");
-    list.put(option, description);
-    return this;
-  }
-  public SelectorTUI add(String option) {
-    option = option.replaceAll("\n", "");
-    list.put(option, "");
-    return this;
-  }
-
-  public SelectorTUI setActiveColor(Colors color) {
-    activeColor = color.getColor();
-    return this;
-  }
-  public SelectorTUI setActiveColor(String color) {
-    activeColor = color;
-    return this;
-  }
-  public SelectorTUI setInactiveColor(Colors color) {
-    inactiveColor = color.getColor();
-    return this;
-  }
-  public SelectorTUI setInactiveColor(String color) {
-    inactiveColor = color;
-    return this;
-  }
-  public SelectorTUI setDescriptionColor(String color) {
-    descColor = color;
-    return this;
-  }
   
   public SelectorTUI onSubmit(Consumer<Integer> set) {
     this.onSubmitCallback = set;
@@ -102,20 +44,23 @@ public class SelectorTUI {
     return this;
   }
 
-  private void clearLines(int n) {
-    for (int i = 0; i < n; i++) System.out.print(TUICursor.CURSOR_UP.toString() + TUICursor.CLEAR_LINE.toString());
-  }
-
   private void render(int selected) {
     System.out.println("\r" + prompt);
-    for (int i = 0; i < options.length; i++) {
+
+    int[] capacity = options.window(selected);
+
+    for (int i = capacity[0]; i < capacity[1]; i++) {
+      String option = options.options()[i];
+      String desc = options.descs()[i];
+      int descSpace = options.descSpacing();
+
       if (i == selected) {
         System.out.println( 
                             " ".repeat(buffer)
                             + " " + activeIcon + " "
-                            + new TextTUI(options[i]).setColor(activeColor)
-                            + " ".repeat(descSpacing - options[i].length())
-                            + new TextTUI(descs[i]).setColor(descColor)
+                            + new TextTUI(option).setColor(activeColor)
+                            + " ".repeat(descSpace - option.length())
+                            + new TextTUI(desc).setColor(descColor)
                             + "\r"
                           );
       }
@@ -123,9 +68,9 @@ public class SelectorTUI {
         System.out.println( 
                             " ".repeat(buffer)
                             + " " + inactiveIcon + " "
-                            + new TextTUI(options[i]).setColor(inactiveColor)
-                            + " ".repeat(descSpacing - options[i].length())
-                            + new TextTUI(descs[i]).setColor(descColor)
+                            + new TextTUI(option).setColor(inactiveColor)
+                            + " ".repeat(descSpace - option.length())
+                            + new TextTUI(desc).setColor(descColor)
                             + "\r"
                           );
       }
@@ -133,23 +78,9 @@ public class SelectorTUI {
     System.out.flush();
   }
 
-  private int selected = 0;
-  private boolean cancelled = false;
-
-  private void init() {
-    if(!list.isEmpty()) {
-      options = list.keySet().toArray(new String[0]);
-      descs = list.values().toArray(new String[0]);
-
-      descSpacing = list.keySet().stream()
-                          .max(Comparator.comparingInt(String::length))
-                          .orElse("")
-                          .length() + 2;
-    }
-  }
 
   public int prompt() {
-    init();
+    options.init();
     int result = execute();
     
     if (onSubmitCallback != null) onSubmitCallback.accept(variable);
@@ -158,33 +89,34 @@ public class SelectorTUI {
   }
   
   private int execute() {
+    int listSize = options.options().length;
     OnClick.reset();
-    int totalLines = options.length + 1;
+    int totalLines = listSize + 1;
     selected = active ? 0 : -1;
 
     render(selected);
 
     OnClick.add(KeyPress.Up_Arrow, () -> {
       if (active) {
-        clearLines(totalLines);
+        options.clearLines(totalLines);
         selected--;
-        selected = selected >= 0 ? selected : options.length-1;
+        selected = selected >= 0 ? selected : listSize-1;
         render(selected);
       }
     });
 
     OnClick.add(KeyPress.Down_Arrow, () -> {
       if (active) {
-        clearLines(totalLines);
+        options.clearLines(totalLines);
         selected++;
-        selected = selected < options.length - 1 ? selected : selected % options.length;
+        selected = selected < listSize - 1 ? selected : selected % listSize;
         render(selected);
       }
     });
 
     OnClick.add(KeyPress.Enter, () -> {
       if(active) {
-        if (clear) clearLines(totalLines); // clear option after select
+        if (clear) options.clearLines(totalLines); // clear option after select
         System.out.flush();
         OnClick.cancel();
       }
@@ -194,7 +126,7 @@ public class SelectorTUI {
       OnClick.add(stop, () -> {
         if (active) {
           active = false;
-          clearLines(totalLines);
+          options.clearLines(totalLines);
           render(-1);
         }
       });
@@ -203,7 +135,7 @@ public class SelectorTUI {
         if (!active) {
           if (c == start) {
             active = true;
-            clearLines(totalLines);
+            options.clearLines(totalLines);
             selected = selected == -1 ? 0 : selected;
             render(selected);
           }
@@ -232,17 +164,9 @@ public class SelectorTUI {
     return this;
   }
 
-  public String getTitle() {
-    return prompt;
-  }
-
+  @Override
   public SelectorTUI setTitle(TextTUI prompt) {
-    String newText = prompt.toString().replaceAll("\n", "");
-    this.prompt = newText;
-    return this;
-  }
-  public SelectorTUI setBuffer(int buffer) {
-    this.buffer = buffer;
+    this.prompt = prompt.toString().replaceAll("\n", "");
     return this;
   }
 
