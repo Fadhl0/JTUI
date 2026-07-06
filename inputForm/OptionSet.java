@@ -10,7 +10,6 @@ public class OptionSet {
   private String[] descs = new String[0];
   private int descSpacing;
   private int limit = -1;
-  private int previousPivot = 0;
 
   public void add(String option, String description) {
     list.put(option.replaceAll("\n", ""), description.replaceAll("\n", ""));
@@ -29,24 +28,21 @@ public class OptionSet {
   public int size()          { return options.length; }
   public int descSpacing()   { return descSpacing; }
 
-  private int windowStart = 0;   // replaces previousPivot entirely
+  private int windowStart = 0;
 
   public int[] window(int pivot) {
     int total = options.length;
 
     if (limit == -1 || total <= limit) {
-        return new int[]{ 0, total };
+      return new int[]{ 0, total };
     }
 
     int maxStart = total - limit;
 
     if (pivot < windowStart) {
-        // moving up past top edge -> land exactly on top row
-        windowStart = pivot;
+      windowStart = pivot;
     } else if (pivot >= windowStart + limit - 2) {
-        // hit the second-to-last visible row -> scroll early to reveal one more below,
-        // keeping cursor pinned at the second-to-last row
-        windowStart = pivot - (limit - 2);
+      windowStart = pivot - (limit - 2);
     }
 
     windowStart = Math.max(0, Math.min(windowStart, maxStart));
