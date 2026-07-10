@@ -6,8 +6,8 @@ import java.util.function.Predicate;
 import inputForm.InputType;
 import inputForm.TUICursor;
 import inputForm.boxShape;
-import inputForm.inputTUI;
-import inputForm.inputTUI.InputTUI;
+import inputForm.Input;
+import inputForm.Input.InputTUI;
 import utils.Colors;
 import utils.Component;
 import utils.Icons;
@@ -31,6 +31,7 @@ public class InputCell implements Cell {
 
   private InputTUI input = new InputTUI()
                               .shape(boxShape.None)
+                              .turnOffSwitch(true)
                               .setAppendText(
                                 () -> new TextTUI("\n")
                                           .appendText(activeBorder)
@@ -120,9 +121,9 @@ public class InputCell implements Cell {
       Automation.cancel();
     });
 
-    inputTUI render = input.build();
+    Input render = input.build();
 
-    String result = render.prompt();
+    String result = render.execute();
     
     Component.enableRawMode();
      // clear option after select

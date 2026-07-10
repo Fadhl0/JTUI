@@ -4,6 +4,40 @@ package Keyhandle;
 
 // F1-F4, Home, End, Backspace, Enter may not work in Win
 public enum KeyPress implements KeyHandle {
+
+  Slash("0x2F"),
+  Dot("0x2E"),
+  Minus("0x2D"),
+  Plus("0x2B"),
+  Equal("0x3D"),
+  Colon("0x3A"),
+  SemiColon("0x3B"),
+  Exclamation("0x21"),
+  AtSymbol("0x40"),
+  OpenBracket("0x5B"),
+  CloseBracket("0x5D"),
+  OpenBrace("0x7B"),
+  CloseBrace("0x7D"),
+  Quote("0x22"),
+  Hash("0x23"),
+  Underscore("0x5F"),
+  Question("0x3F"),
+  Dollar("0x24"),
+  Percent("0x25"),
+  Caret("0x5E"),
+  Tilde("0x7E"),
+  Pipe("0x7C"),
+  Asterisk("0x2A"),
+  Apostrophe("0x27"),
+  Ampersand("0x26"),
+  OpenParen("0x28"),
+  CloseParen("0x29"),
+  LessThan("0x3C"),
+  GreaterThan("0x3E"),
+  Comma("0x2C"),
+  BackTick("0x60"),
+  BackSlash("0x5C"),
+  
   AnyKey("All"),
   Enter("0x0A"),      // Or 0x0D
   Backspace("0x7F"),  // Or 0x08

@@ -3,6 +3,7 @@ package utils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -13,11 +14,25 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
+import Keyhandle.KeyHandle;
+import Keyhandle.KeyModifier;
+import Keyhandle.KeyPress;
+import Keyhandle.OnClick;
+import inputForm.TUIComponent;
 import inputForm.TUICursor;
 
 public class Container {
-    private final CopyOnWriteArrayList<Supplier<String>> listeners = new CopyOnWriteArrayList<>();
-    private final ArrayList<Boolean>                     newLine   = new ArrayList<>();
+
+    public Container() {
+        OnClick.reset();
+    }
+
+    private record Entry(Supplier<String> renderer, boolean isText, Alignment alignment) {}
+    private final CopyOnWriteArrayList<Entry> listeners  = new CopyOnWriteArrayList<>();
+    private final HashMap<KeyHandle, TUIComponent> startingKeys = new HashMap<>();
+
+    private final List<TUIComponent> focusables = new ArrayList<>();
+    private int focusedIndex = -1;
     private final ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor();
 
@@ -26,14 +41,6 @@ public class Container {
     // private          String[] prevFrame   = new String[0];
     private          Map<Integer, String> prevFrame = new HashMap<>();
     private final    int[]    prevSize    = {0, 0};
-
-    // ── Registration ────────────────────────────────────────────────────────
-
-    public void append(Supplier<String> supplier) {
-        listeners.add(supplier);
-        newLine.add(false);
-        markDirty();
-    }
 
 
     public enum Alignment {
@@ -45,14 +52,83 @@ public class Container {
         INLINE_CENTER   // same row but center
     }
 
-    private final Map<Integer, Alignment> alignMap = new LinkedHashMap<>();
-    public void append(Supplier<String> supplier, Alignment alignment) {
-        int idx = listeners.size();
-        listeners.add(supplier);
-        newLine.add(false);
-        alignMap.put(idx, alignment);
+    /**
+     * Append components e.g., LogoTUI, ImageTUI, BarTUI, BadgeTUI etc.
+     * @param supplier String
+     */
+    public void append(Supplier<String> supplier) {
+        listeners.add(new Entry(supplier, false, null));
         markDirty();
     }
+
+    /**
+     * Append components (e.g., LogoTUI, ImageTUI etc.) But with Alignment position (e.g., TOP, BOTTOM, CENTER etc.).
+     * @param supplier
+     * @param alignment
+     */
+    public void append(Supplier<String> supplier, Alignment alignment) {
+        listeners.add(new Entry(supplier, false, alignment));
+        markDirty();
+    }
+
+    /**
+     * Append normal TextTUI text without reference (If it changes, it won't update).
+     * @param text
+     */
+    public void appendText(TextTUI text) {
+        listeners.add(new Entry(text::toString, true, null));
+        markDirty();
+    }
+
+    /**
+     * Append components that inhernt from TUIComponent interface e.g., Input and SelectorTUI.
+     * @param component TUIComponent
+     */
+    public void appendComponent(TUIComponent component) {
+        listeners.add(new Entry(component::fire, false, null));
+
+        if (component.isFocusable()) {
+            KeyHandle startKey = component.getStartKey();
+            boolean duplicate = startingKeys.keySet().stream()
+                .anyMatch(k -> k.press().equals(startKey.press()));
+            if (duplicate) {
+                throw new IllegalArgumentException(
+                    "Duplicate start key: " + startKey);
+            }
+            component.startActive(false);
+            focusables.add(component);
+            startingKeys.put(startKey, component);
+        }
+
+        markDirty();
+    }
+
+    // enable key handling by pressing Tab key
+    private void focusComponent(int index) {
+        if (index < 0 || index >= focusables.size()) return;
+        if (focusedIndex >= 0 && focusedIndex != index) {
+            focusables.get(focusedIndex).onBlur();
+        }
+        focusedIndex = index;
+        TUIComponent comp = focusables.get(index);
+        comp.onFocus();
+
+        OnClick.add(comp.getStopKey(), () -> {
+            comp.onBlur();
+            OnClick.reset();
+            containerKeyHandler();
+            markDirty();
+        });
+
+        markDirty();
+    }
+
+    // next Component pressing Tab key
+    private void focusNext() {
+        if (focusables.isEmpty()) return;
+        focusComponent((focusedIndex + 1) % focusables.size());
+    }
+
     private String centerLine(String line, int termCols) {
         int visibleLen = ANSI_PATTERN.matcher(line).replaceAll("").length();
         int pad = Math.max(0, (termCols - visibleLen) / 2);
@@ -66,10 +142,13 @@ public class Container {
 
         // Pass 1 — sequential elements fill top-down
         for (int i = 0; i < listeners.size(); i++) {
-            Alignment alignment = alignMap.get(i);
+            Entry entry = listeners.get(i);
+            Alignment alignment = entry.alignment();
+            
+            // Skip absolutely positioned components in Pass 1
             if (alignment != null && alignment != Alignment.INLINE_CENTER) continue;
 
-            String[] lines = renderElement(listeners.get(i).get(), newLine.get(i), termCols);
+            String[] lines = renderElement(entry.renderer().get(), entry.isText(), termCols);
             for (String line : lines) {
                 if (currentRow < termRows) {
                     frame.put(currentRow++,
@@ -82,19 +161,19 @@ public class Container {
         }
 
         // Pass 2 — aligned elements placed at computed absolute rows
-        for (Map.Entry<Integer, Alignment> entry : alignMap.entrySet()) {
-            if (entry.getValue() == Alignment.INLINE_CENTER) continue;
+        for (int i = 0; i < listeners.size(); i++) {
+            Entry entry = listeners.get(i);
+            Alignment alignment = entry.alignment();
 
-            int       idx       = entry.getKey();
-            Alignment alignment = entry.getValue();
+            // Skip non-aligned or inline elements in Pass 2
+            if (alignment == null || alignment == Alignment.INLINE_CENTER) continue;
 
-            String[] lines     = renderElement(listeners.get(idx).get(), newLine.get(idx), termCols);
+            String[] lines     = renderElement(entry.renderer().get(), entry.isText(), termCols);
             int      lineCount = lines.length;
 
             int startRow = switch (alignment) {
                 case BOTTOM, CENTER_BOTTOM -> termRows - lineCount;
                 case CENTER                -> Math.max(0, (termRows - lineCount) / 2);
-                // case TOP, CENTER_TOP       -> 0;
                 default -> 0;
             };
 
@@ -102,9 +181,9 @@ public class Container {
                             || alignment == Alignment.CENTER_TOP
                             || alignment == Alignment.CENTER_BOTTOM;
 
-            for (int i = 0; i < lineCount; i++) {
-                int targetRow = Math.max(0, Math.min(termRows - 1, startRow + i));
-                String line = centered ? centerLine(lines[i], termCols) : lines[i];
+            for (int j = 0; j < lineCount; j++) {
+                int targetRow = Math.max(0, Math.min(termRows - 1, startRow + j));
+                String line = centered ? centerLine(lines[j], termCols) : lines[j];
                 frame.put(targetRow, line);
             }
         }
@@ -112,22 +191,22 @@ public class Container {
         return frame;
     }
 
-    public void appendText(TextTUI text) {
-        listeners.add(text::toString);
-        newLine.add(true);
-        markDirty();
-    }
-
     /** Call this from any component whenever its state changes. */
     public void markDirty() { dirty = true; }
 
     // ── Lifecycle ────────────────────────────────────────────────────────────
 
+    /**
+     * Abort the Container
+     */
     public void stop() {
         System.out.print(TUICursor.SHOW_CURSOR);
         executor.shutdown();
     }
 
+    /**
+     * Run the Container
+     */
     public void execute() {
         WindowsAPI.apply();
         System.out.print(TUICursor.HIDE_CURSOR);
@@ -186,6 +265,36 @@ public class Container {
             prevFrame = frame;
 
         }, 0, 16, TimeUnit.MILLISECONDS); // ~60 fps, renders only when dirty
+    
+        // New
+        containerKeyHandler();
+        // OnClick.add(KeyModifier.CTRL.with('c'), OnClick::cancel);
+        try {
+            OnClick.execute();   // blocks here — this is now the single input loop for the whole app
+        } catch (Exception e) {
+            e.printStackTrace();
+            stop();
+        }
+    }
+
+    private void containerKeyHandler() {
+        OnClick.add(KeyPress.Tab, this::focusNext);
+        OnClick.add(KeyModifier.CTRL.with('c'), this::shutdownFromKey);
+
+        for (Map.Entry<KeyHandle, TUIComponent> entry : startingKeys.entrySet()) {
+            TUIComponent component = entry.getValue();
+            int index = focusables.indexOf(component);
+            OnClick.add(entry.getKey(), () -> focusComponent(index));
+        }
+    }
+
+    private void shutdownFromKey() {
+        stop();
+        if (focusedIndex >= 0) {
+            focusables.get(focusedIndex).onBlur();
+        }
+        OnClick.reset();
+        OnClick.cancel();
     }
 
     // ── Rendering helper ─────────────────────────────────────────────────────

@@ -64,10 +64,10 @@ public class OnClick {
 
         if (key == '\r') key = '\n';
 
-        if (hasListener(KeyPress.AnyKey.press())){
-          fireListener(KeyPress.AnyKey);
-          break;
-        }
+        // if (hasListener(KeyPress.AnyKey.press())){
+        //   fireListener(KeyPress.AnyKey);
+        //   break;
+        // }
 
         // CTRL+C handling (Decimal 3)
         if (key == 3) {
@@ -80,8 +80,13 @@ public class OnClick {
 
         if (key == 0x1B) {
           handleEscape(in); // escape sequence
-        } else {
-          dispatch(toHEX(key)); // normal key + KeyModifer
+        } 
+        else {
+          String hex = toHEX(key);
+          boolean handled = dispatch(hex);
+          if (!handled && hasListener(KeyPress.AnyKey.press())) {
+            fireListener(KeyPress.AnyKey);
+          }
         }
 
         if (key >= 0x20 && key <= 0x7E) {
@@ -139,13 +144,14 @@ public class OnClick {
     cancelled = false;
   }
 
-  private static void dispatch(String hex) {
+  private static boolean dispatch(String hex) {
     for (Map.Entry<KeyHandle, Runnable> entry : listeners.entrySet()) {
       if (entry.getKey().press().equals(hex)) {
         entry.getValue().run();
-        return;
+        return true;
       }
     }
+    return false;
   }
 
   private static void dispatchSequence(String seq) {

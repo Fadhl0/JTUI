@@ -11,6 +11,7 @@ import Text.ImageTUI;
 import Text.LogoTUI;
 import Text.LogoTUI.TUIFont;
 import automation.Automation;
+import automation.BoxCell;
 import automation.InputCell;
 import automation.MultiSelectorCell;
 import automation.ScannerCell;
@@ -19,10 +20,9 @@ import automation.SpinnerCell;
 import automation.TextCell;
 import inputForm.SelectorTUI;
 import inputForm.boxShape;
-import inputForm.InputContainer;
-import inputForm.InputContainer.Input;
+import inputForm.Input;
 import inputForm.boxBorder.BoxTUI;
-import inputForm.inputTUI.InputTUI;
+import inputForm.Input.InputTUI;
 import utils.AlignText;
 import utils.BadgeTUI;
 import utils.BarTUI;
@@ -41,19 +41,36 @@ import utils.Container.Alignment;
 public class App {
     public static void main(String[] args) throws IOException, InterruptedException {
         Component.clear();
-
+        
+        AtomicReference<Integer> select = new AtomicReference<>();
         SelectorTUI opt = new SelectorTUI()
                           .setTitle(new TextTUI("Explore The Library:"))
                           .clearAfterSubmit()
-                          .options("TextTUI", "LogoFonts", "Logo Colored",
-                                   "Gradient Color", "Image to Text", "Logo With Image",
-                                   "Box", "Responsive Box", "TableBox",
-                                   "Input", "Selector", "Quote",
-                                   "Click Event", "Tables", "Align Text",
-                                   "Automation", "Container");
-
-        int select = opt.prompt();
-        switch (select) {
+                          .limitDisplay(6)
+                        //   .setActiveSelectorIcon("-", "#ff2424")
+                        //   .setInactiveSelectorIcon(" ", "#ffffff")
+                        //   .startActive(false)
+                          .onSubmit(select::set)
+                          .add("TextTUI")
+                          .add("LogoFonts")
+                          .add("Logo Colored")
+                          .add("Gradient Color")
+                          .add("Image to Text")
+                          .add("Logo With Image")
+                          .add("Box")
+                          .add("Responsive Box")
+                          .add("TableBox")
+                          .add("Input")
+                          .add("Selector")
+                          .add("Quote")
+                          .add("Click Event")
+                          .add("Tables")
+                          .add("Align Text")
+                          .add("Container", "replaceable of GUI")
+                          .add("Automation", "Scanner | Selector | Input | Spinner and more");
+                          
+        opt.execute();
+        switch (select.get()) {
             case 0:
                 System.out.println(new BadgeTUI().append(new TextTUI("Text Customization").setColor("#3abdff")));
                 System.out.println();
@@ -134,17 +151,17 @@ public class App {
                 AlignTextExample();
                 break;
             case 15:
-                automationExample();
+                ContainerExample();
                 break;
             case 16:
-                ContainerExample();
+                automationExample();
                 break;
             default:
                 break;
         }
 
 
-        Component.clear();
+        // Component.clear();
         String xml = """
                 <p style=\"Italic Bold\">
                 Hello <br>
@@ -177,6 +194,22 @@ public class App {
                     </li>
                     <li>Milk</li>
                 </ul>
+
+                <br>
+                <table gap="5">
+                    <tr>
+                        <td color="#f9f948">Month</td>
+                        <td bg-color="#a3a3a3">Savings</td>
+                    </tr>
+                    <tr color="#f95748">
+                        <td>January</td>
+                        <td>$100\n2000$</td>
+                    </tr>
+                    <tr>
+                        <td> </td>
+                        <td>Total</td>
+                    </tr>
+                </table>
                 </p>
                 """;
         TextTUI t = new SmartTextTUI(xml);
@@ -228,19 +261,31 @@ public class App {
 
         TableBox table2 = new TableBox(userBox.responsive(), securityBox.responsive());
 
-        Input input = new Input()
+        // AtomicReference<Integer> res = new AtomicReference<>();
+        SelectorTUI selector = new SelectorTUI()
+                                  .setTitle(new TextTUI("What is your favorite color?"))
+                                  .onSubmit(result -> System.out.println(AlignText.bottom("Submit hook: " + result)))
+                                  .limitDisplay(4)
+                                  .wrapInBorder(boxShape.SingleLine, "#ffffff", "#696969")
+                                  .add("Red").add("Orange")
+                                  .add("Green").add("Blue")
+                                  .add("Pink").add("Other");
+
+        InputTUI input = new InputTUI()
                         .label(new TextTUI(" Add Text "))
                         .placeholder(new TextTUI("Type something…").setColor("#5f5f5f"))
                         .maxLength(100)
-                        .setBorderColor(Colors.setColor("#65ff70"))
+                        .setActiveBorderColor(Colors.setColor("#65ff70"))
+                        .setInactiveBorderColor(Colors.setColor("#696969"))
                         .width(-1)
+                        // .startActive(false)
                         .onChange(result -> {
                             System.out.println(AlignText.bottom("Change hook: " + result));
                         })
                         .onSubmit(result -> System.out.println(AlignText.bottom("Submit hook: " + result)))
-                        .icon(new TextTUI(" " + Icons.Search.get() + " ").setColor("#62ff54"));
+                        .setIcon(new TextTUI(" " + Icons.Search.get() + " ").setColor("#62ff54"));
 
-        InputContainer in = input.build();
+        Input in = input.build();
 
         Container c1 = new Container();
         
@@ -249,15 +294,11 @@ public class App {
         c1.append(table1::toString, Alignment.INLINE_CENTER);
         
         c1.append(() -> "\n");
-        c1.append(in::prompt);
+        c1.appendComponent(in);
+        c1.appendComponent(selector);
         c1.append(table2::toString);
         
-
-        in.setContainer(c1);
-
         c1.execute();
-        in.listen();
-        c1.stop();
 
     }
 
@@ -301,13 +342,25 @@ public class App {
         String[] options = {"Turkcell", "Türk Telekom", "Vodafone Turkey"};
         AtomicReference<Integer> result = new AtomicReference<>();
         SelectorCell cell = new SelectorCell()
-                            .options(options)
+                            .add("Turkcell", "This is the BEST!")
+                            .add("Türk Telekom")
+                            .add("Vodafone Turkey", "This is the worst!")
+                            .add("Vodafo4ne Turkey", "This is the worst!")
+                            .add("Vodafon3e Turkey", "This is the worst!")
+                            .add("Vodafone3 Turkey", "This is the worst!")
+                            // .limitDisplay(4)
                             .onSubmit(result::set)
                             .setTitle(new TextTUI("Select your primary Telecom provider:\n"));
 
         List<Integer> result1 = new ArrayList<>();
         MultiSelectorCell cell4 = new MultiSelectorCell()
-                            .options(options)
+                            .add("Turkcell", "This is the BEST!")
+                            .add("Türk Telekom")
+                            .add("Vodafone Turkey", "This is the worst!")
+                            .add("Vodafo4ne Turkey", "This is the worst!")
+                            .add("Vodafon3e Turkey", "This is the worst!")
+                            .add("Vodafone3 Turkey", "This is the worst!")
+                            // .limitDisplay(5)
                             .onSubmit(result1::addAll)
                             .preSelect(0, 1)
                             .setTitle(new TextTUI("Select additional telecom provider for backup:"));
@@ -330,6 +383,15 @@ public class App {
 
         Component.clear();
         System.out.println();
+
+        BoxCell summery = new BoxCell()
+                            .label(new TextTUI(" Your Info. "))
+                            // .roundCorners(true)
+                            .setText(() -> {
+                                    return 
+                                        new TextTUI("\nPhone Number: " + result2.get() + "\nPrimary Telecom SIM: " + options[result.get()] + "\nOther providers in index: " + result1 + "\n")
+                                          .setColor("#66b8f7");
+                                    });
         
         Automation.create().appendCell(cell1)
                            .appendCell(cell5)
@@ -337,16 +399,10 @@ public class App {
                            .appendCell(cell4)
                            .appendCell(cell2)
                            .appendCell(cell3)
+                           .appendCell(summery)
+                           .roundCorner()
                            .setBuffer(2)
                            .setTitle(new TextTUI(" JTUI ").setBackgroundColor("#f44336"))
-                           .summary(
-                                new TextTUI(" Your Info. "),
-                                () -> {
-                                    return 
-                                        new TextTUI("\nPhone Number: " + result2.get() + "\nPrimary Telecom SIM: " + options[result.get()] + "\nOther providers in index: " + result1 + "\n")
-                                          .setColor("#66b8f7");
-                                }
-                           )
                            .start();
 
         System.out.println();
@@ -479,13 +535,17 @@ public class App {
     }
 
     private static void selectorExample() {
+        AtomicReference<Integer> result = new AtomicReference<>();
         SelectorTUI selector = new SelectorTUI()
                                   .setTitle(new TextTUI("What is your favorite color?"))
-                                //   .clearAfterSubmit()
-                                  .options("Red", "Orange", "Green", "Blue", "Pink", "Other");
+                                  .onSubmit(result::set)
+                                  .clearAfterSubmit()
+                                  .add("Red").add("Orange")
+                                  .add("Green").add("Blue")
+                                  .add("Pink").add("Other");
 
-        int select = selector.prompt();
-        System.out.println("You select: index " + select);
+        selector.execute();
+        System.out.println("You select: index " + result.get());
     }
 
     private static void inputExample() {
@@ -493,13 +553,14 @@ public class App {
                              .label(new TextTUI(" Enter Your Email ").setColor(Colors.Green600))
                              .placeholder(new TextTUI("example@company.com").setColor(Colors.Gray500))
                              .setIcon(new TextTUI(" > ").bold())
-                             .setBorderColor("#8aff0c")
+                             .setActiveBorderColor("#8aff0c")
+                             .setInactiveBorderColor(Colors.Gray500)
                              .validator(t -> !t.isEmpty(), new TextTUI("⚠  Empty Field!"))
                              .validator(t -> t.contains("@") && t.contains("."),
                                         new TextTUI("⚠  Invalid Email!")
                              );
             
-        String textOutput = input.build().prompt();
+        String textOutput = input.build().execute();
         System.out.println("You submit: " + textOutput);
     }
 
