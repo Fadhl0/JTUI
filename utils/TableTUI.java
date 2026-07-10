@@ -19,6 +19,7 @@ public class TableTUI {
     }
 
     private int calcMaxCol() {
+      this.maxCol = 0;
       rows.forEach(row -> {
         this.maxCol = Math.max(maxCol, row.length);
       });
@@ -110,9 +111,9 @@ public class TableTUI {
       return rows.get(index);
     }
 
-    // public String build() {
-    //   return refreashTUI();
-    // }
+    public int[] getColumnWidths() {
+      return calcMaxWidths();
+    }
 
     @Override
     public String toString() {

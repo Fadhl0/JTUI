@@ -30,6 +30,8 @@ public class SelectorTUI extends BaseSelector<SelectorTUI> implements TUICompone
 
   private int selected = 0;
 
+  private boolean invert = false;
+
   public SelectorTUI() {}
   
   /**
@@ -89,6 +91,14 @@ public class SelectorTUI extends BaseSelector<SelectorTUI> implements TUICompone
     return this;
   }
 
+  /**
+   * - Invert active option's color. (legacy mode)
+   */
+  public SelectorTUI invertActiveSelectors(){
+    invert = true;
+    return this;
+  }
+
   private void initBorderBox() {
     if(!box.equals(boxShape.None)) {
       activeBox = new BoxTUI().shape(box).color(activeBorderColor);
@@ -102,20 +112,23 @@ public class SelectorTUI extends BaseSelector<SelectorTUI> implements TUICompone
     if(active) activeIcon.setColor(activeIconColor);
     else activeIcon.setColor(inactiveIconColor);
 
-    if(box.equals(boxShape.None)) sb.append("\r" + prompt);
+    if(box.equals(boxShape.None) && !prompt.isEmpty()) sb.append("\r" + prompt);
     sb.append("\n");
 
     int[] capacity = options.window(selected);
 
     for (int i = capacity[0]; i < capacity[1]; i++) {
       String option = options.options()[i];
+      TextTUI opt = new TextTUI(option);
       String desc = options.descs()[i];
       int descSpace = options.descSpacing();
 
+      
       if (i == selected) {
+        if(invert) opt.invert();
         sb.append(" ".repeat(buffer))
           .append(" " + activeIcon + " ")
-          .append(new TextTUI(option).setColor(activeColor).toString())
+          .append(opt.setColor(activeColor).toString())
           .append(" ".repeat(descSpace - option.length()))
           .append(new TextTUI(desc).setColor(descColor).toString())
           // .append("\r")
@@ -124,7 +137,7 @@ public class SelectorTUI extends BaseSelector<SelectorTUI> implements TUICompone
       else {
         sb.append(" ".repeat(buffer))
           .append(" " + inactiveIcon + " ")
-          .append(new TextTUI(option).setColor(inactiveColor).toString())
+          .append(opt.setColor(inactiveColor).toString())
           .append(" ".repeat(descSpace - option.length()))
           .append(new TextTUI(desc).setColor(descColor).toString())
           // .append("\r")
@@ -306,6 +319,10 @@ public class SelectorTUI extends BaseSelector<SelectorTUI> implements TUICompone
   public SelectorTUI startActive(boolean startActive) {
     this.active = startActive;
     return this;
+  }
+
+  public boolean isActive() {
+    return active;
   }
 
 }
