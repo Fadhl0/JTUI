@@ -18,7 +18,7 @@ sealed public class TextTUI permits SmartTextTUI {
     }
 
     public String getText() {
-        return this.text.toString();
+        return Component.visibleText(text.toString());
     }
     public String getStyle() {
         return ANSIformat.format("", this.color, getStyleList(), this.backgroundColor, false);
