@@ -6,10 +6,15 @@ import Keyhandle.KeyPress;
 import Keyhandle.OnClick;
 import utils.Colors;
 import utils.Component;
-import utils.Container;
+import utils.ContainerOld;
 import utils.TextTUI;
 import java.util.function.Consumer;
 
+/**
+ * Use Input instead
+ * InputContainer
+ */
+@Deprecated
 public class InputContainer {
 
     private TextTUI   label;
@@ -219,14 +224,7 @@ public class InputContainer {
         return sb.toString();
     }
 
-    public String listen() {
-        try {
-            OnClick.execute();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return cancelled ? null : buffer.toString();
-    }
+    
 
     private void handleCharacter(Character c) {
         if (buffer.length() >= maxLength) return;
@@ -256,11 +254,6 @@ public class InputContainer {
     private void moveCursor(int delta) {
         cursor = Math.max(0, Math.min(buffer.length(), cursor + delta));
         adjustScroll(currentInnerWidth());
-        onStateChange();
-    }
-
-    private void notifyChange() {
-        if (onChange != null) onChange.accept(buffer.toString());
         onStateChange();
     }
 
@@ -307,13 +300,27 @@ public class InputContainer {
     }
 
     // Hook
-    private Container container;
-    public InputContainer setContainer(Container c) {
+    private ContainerOld container;
+    public InputContainer setContainer(ContainerOld c) {
         setupHandlers();
         this.container = c;
         return this;
     }
     private void onStateChange() {
         if (container != null) container.markDirty();
+    }
+
+    public String listen() {
+        try {
+            OnClick.execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return cancelled ? null : buffer.toString();
+    }
+
+    private void notifyChange() {
+        if (onChange != null) onChange.accept(buffer.toString());
+        onStateChange();
     }
 }
