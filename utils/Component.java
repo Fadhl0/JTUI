@@ -192,6 +192,11 @@ public class Component {
         return result.toString();
     }
 
+    public static String visibleText(String s) {
+        String text = removeStyle(s);
+        return text;
+    }
+
     public static String removeStyle(String s) {
         return Pattern.compile(ANSI_PATTERN).matcher(s).replaceAll("");
     }
