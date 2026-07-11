@@ -23,6 +23,7 @@ public class SmartTableTUI implements TUIComponent {
   private boxShape shape = boxShape.SingleLine;
   private String activeColor = "#ffffff";
   private String inactiveColor = "#969696";
+  private boolean fullWidth = true;
   
   private int columns = -1;
 
@@ -83,6 +84,21 @@ public class SmartTableTUI implements TUIComponent {
     return this;
   }
 
+  /**
+   * limit the number of options that display.
+   * - default is -1, means no limit
+   * @param limit number of limit (must be greater than 3)
+   */
+  public SmartTableTUI limitDisplay(int limit) {
+    selectors.limitDisplay(limit);
+    return this;
+  }
+
+  // public SmartTableTUI setFullWidth() {
+  //   fullWidth = true;
+  //   return this;
+  // }
+
   public SmartTableTUI tableRows(String ...rows) {
     String[] newRow = new String[columns];
     int limit = Math.min(rows.length, columns);
@@ -101,14 +117,15 @@ public class SmartTableTUI implements TUIComponent {
     StringBuilder sb = new StringBuilder();
 
     allRows = options();
+    int length = fullWidth ? Component.getTerminalSize()[1] - 1 : Component.visibleLength(allRows[0]);
     sb.append("  " + allRows[0]);
 
     while (addedRowCount < rows.size() && (addedRowCount + 1) < allRows.length) {
-      selectors.add(Component.visibleText(allRows[addedRowCount + 1]));
+      selectors.add(Component.visibleText(padding(allRows[addedRowCount + 1], length)));
       addedRowCount++;
     }
 
-    sb.append(horizontalLine(allRows[0].length()));
+    sb.append(horizontalLine(length-1));
 
     if (selectors.isActive()) box.color(activeColor);
     else box.color(inactiveColor);
@@ -117,7 +134,7 @@ public class SmartTableTUI implements TUIComponent {
     if (result != null && result.length() > 1) {
       String sub = result.substring(1, result.length() - 1);
       sb.append(sub);
-    } else sb.append("No Data To Display!");
+    } else throw new IllegalArgumentException("No Rows assigned yet!");
 
     box.innerText(new TextTUI(sb.toString()));
     return new TableBox(box).build();
@@ -148,6 +165,14 @@ public class SmartTableTUI implements TUIComponent {
     }
     
     return box.toString().split("\n", -1);
+  }
+
+  private String padding(String text, int max) {
+    int msgLength = new TextTUI(text).length();
+    int spaceCount = Math.max(0, ((max - 5) - msgLength));
+
+    String padding = " ".repeat(spaceCount);
+    return text + padding;
   }
 
   @Override
