@@ -12,6 +12,7 @@ import java.nio.charset.StandardCharsets;
  * (sizeof == 60). macOS's termios layout differs (no c_line field,
  * NCCS == 20) — if you need Mac support, say so and I'll add a second
  * layout switched on os.name.
+ * <li> caution: Cloude Sonnet 5 made this.</li>
  */
 public final class RawMode {
 
@@ -173,15 +174,5 @@ public final class RawMode {
             int r1 = (int) SET_CONSOLE_MODE.invokeExact(handle, savedWinMode);
             int r2 = (int) CLOSE_HANDLE.invokeExact(handle);
         }
-    }
-
-    // Quick manual test
-    public static void main(String[] args) throws InterruptedException {
-        System.out.println("Enabling raw mode...");
-        enable();
-        Thread.sleep(2000);
-        System.out.println("Disabling raw mode...");
-        disable();
-        System.out.println("Done.");
     }
 }

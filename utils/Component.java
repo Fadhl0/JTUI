@@ -5,7 +5,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.text.BreakIterator;
-import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,85 +50,10 @@ public class Component {
         }
     }
 
-
-
-    private static Path getBinaryPath(String name) {
-        WindowsAPI.apply();
-
-        String os = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
-        boolean isWindows = os.contains("win");
-        String binaryName = isWindows ? name + ".exe" : name;
-
-        Path resolved = null;
-
-        try {
-            java.net.URL resource = Component.class.getResource("subprocessTerminal/" + binaryName);
-            if (resource != null) {
-                resolved = Path.of(resource.toURI()).normalize();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (resolved == null) {
-            resolved = Path.of("utils", "subprocessTerminal", binaryName).toAbsolutePath();
-        }
-
-        resolved.toFile().setExecutable(true);   // always called now
-        return resolved;
-    }
-
     public static int[] getTerminalSize() {
         Size size = TerminalSize.get();
         return new int[]{size.rows(), size.cols()};
     }
-
-    public static void enableRawModeOld() {
-        if (isLive) return;
-
-        try {
-            int exitCode = new ProcessBuilder(getBinaryPath("rowmode").toString(), "-s")
-                .inheritIO()
-                .start()
-                .waitFor();
-
-            isLive = true;
-            
-            if (exitCode != 0) {
-                System.err.println("Row mode enable failed with exit code: " + exitCode);
-            }
-
-        } catch (IOException e) {
-            System.err.println("Failed to launch rawmode binary: " + e.getMessage());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            System.err.println("Row mode enable interrupted: " + e.getMessage());
-        }
-    }
-
-    public static void disableRawModeOld() {
-        if (!isLive) return;
-
-        try {
-            int exitCode = new ProcessBuilder(getBinaryPath("rowmode").toString(), "-q")
-                .inheritIO()
-                .start()
-                .waitFor();
-            
-            isLive = false;
-
-            if (exitCode != 0) {
-                System.err.println("Row mode disable failed with exit code: " + exitCode);
-            }
-
-        } catch (IOException e) {
-            System.err.println("Failed to launch rawmode binary: " + e.getMessage());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            System.err.println("Row mode disable interrupted: " + e.getMessage());
-        }
-    }
-
 
     public static void enableRawMode(){
         if (isLive) return;
@@ -142,8 +66,6 @@ public class Component {
         isLive = false;
     }
 
-
-    
     public static int visibleLength(String s) {
         String text = removeStyle(s);
         BreakIterator iterator = BreakIterator.getCharacterInstance();
