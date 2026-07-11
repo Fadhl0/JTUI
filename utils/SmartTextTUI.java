@@ -62,6 +62,14 @@ final public class SmartTextTUI extends TextTUI {
 
   // Convert Tags -> TextTUI
   private String tagsConverter() {
+
+    // Reset state
+    sb.setLength(0);
+    parents.clear();
+    table.clear();
+    tempRow = null;
+    indexRow = 0;
+
     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     DocumentBuilder builder = null;
     try {
