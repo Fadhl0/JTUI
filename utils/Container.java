@@ -27,7 +27,7 @@ public class Container {
         OnClick.reset();
     }
 
-    private record Entry(Supplier<String> renderer, boolean isText, Alignment alignment) {}
+    private record Entry(Supplier<String> renderer, boolean isText, Alignment alignment, Object source) {}
     private final CopyOnWriteArrayList<Entry> listeners  = new CopyOnWriteArrayList<>();
     private final HashMap<KeyHandle, TUIComponent> startingKeys = new HashMap<>();
 
@@ -56,9 +56,11 @@ public class Container {
      * Append components e.g., LogoTUI, ImageTUI, BarTUI, BadgeTUI etc.
      * @param supplier String
      */
-    public void append(Supplier<String> supplier) {
-        listeners.add(new Entry(supplier, false, null));
+    public Object append(Supplier<String> supplier) {
+        Entry e = new Entry(supplier, false, null, supplier);
+        listeners.add(e);
         markDirty();
+        return e;
     }
 
     /**
@@ -66,8 +68,34 @@ public class Container {
      * @param supplier
      * @param alignment
      */
-    public void append(Supplier<String> supplier, Alignment alignment) {
-        listeners.add(new Entry(supplier, false, alignment));
+    public Object append(Supplier<String> supplier, Alignment alignment) {
+        Entry e = new Entry(supplier, false, alignment, supplier);
+        listeners.add(e);
+        markDirty();
+        return e;
+    }
+
+    /**
+     * Append components that inhernt from TUIComponent interface e.g., Input and SelectorTUI. But with Alignment position (e.g., TOP, BOTTOM, CENTER etc.).
+     * @param supplier
+     * @param alignment
+     */
+    public void appendComponent(TUIComponent component, Alignment alignment) {
+        listeners.add(new Entry(component::fire, false, alignment, component));
+
+        if (component.isFocusable()) {
+            KeyHandle startKey = component.getStartKey();
+            if (startKey != null) {
+                boolean duplicate = startingKeys.keySet().stream()
+                    .filter(java.util.Objects::nonNull)
+                    .anyMatch(k -> k.press().equals(startKey.press()));
+                if (duplicate) throw new IllegalArgumentException("Duplicate start key: " + startKey);
+            }
+            component.startActive(false);
+            focusables.add(component);
+            if (startKey != null) startingKeys.put(startKey, component);
+        }
+
         markDirty();
     }
 
@@ -75,9 +103,12 @@ public class Container {
      * Append normal TextTUI text without reference (If it changes, it won't update).
      * @param text
      */
-    public void appendText(TextTUI text) {
-        listeners.add(new Entry(text::toString, true, null));
+    public Object appendText(TextTUI text) {
         markDirty();
+        Entry e = new Entry(text::toString, true, null, text);
+        listeners.add(e);
+        markDirty();
+        return e;
     }
 
     /**
@@ -85,22 +116,52 @@ public class Container {
      * @param component TUIComponent
      */
     public void appendComponent(TUIComponent component) {
-        listeners.add(new Entry(component::fire, false, null));
+        appendComponent(component, null);
+    }
 
-        if (component.isFocusable()) {
-            KeyHandle startKey = component.getStartKey();
-            boolean duplicate = startingKeys.keySet().stream()
-                .anyMatch(k -> k.press().equals(startKey.press()));
-            if (duplicate) {
-                throw new IllegalArgumentException(
-                    "Duplicate start key: " + startKey);
+    /**
+     * Remove a plain Supplier or a TextTUI element from the container.
+     */
+    public boolean remove(Object handle) {
+       boolean removed = listeners.remove(handle); // Entry has no custom equals, so identity works naturally
+       if (removed) markDirty();
+       return removed;
+    }
+
+    /**
+     * Remove an interactive TUIComponent, handling focus state and keybind cleanup.
+     */
+    public boolean removeComponent(TUIComponent component) {
+        if (component == null) return false;
+
+        // 1. Remove from render list
+        boolean removed = listeners.removeIf(entry -> entry.source() == component);
+
+        if (removed) {
+            // 2. Safe-handle focusable list changes
+            int index = focusables.indexOf(component);
+            if (index >= 0) {
+                if (focusedIndex == index) {
+                    component.onBlur();
+                    focusedIndex = -1; // Reset active focus
+                } else if (focusedIndex > index) {
+                    focusedIndex--; // Shift active index back to match list position
+                }
+                focusables.remove(index);
             }
-            component.startActive(false);
-            focusables.add(component);
-            startingKeys.put(startKey, component);
-        }
 
-        markDirty();
+            // 3. Remove shortcut key bindings
+            if (component.isFocusable()) {
+                startingKeys.remove(component.getStartKey());
+            }
+
+            // 4. Tell OnClick loop to unregister old shortcuts immediately
+            OnClick.reset();
+            containerKeyHandler();
+
+            markDirty();
+        }
+        return removed;
     }
 
     // enable key handling by pressing Tab key
@@ -317,12 +378,17 @@ public class Container {
 
         String[] result = new String[parts.length];
         for (int i = 0; i < parts.length; i++) {
-            if (plainParts[i].length() > termWidth) {
+            if (plainParts[i].length() >= termWidth) {
                 result[i] = Component.visibleSubstring(parts[i], 0, termWidth) + ANSI.Reset;
             } else {
                 result[i] = parts[i];
             }
         }
         return result;
+    }
+
+    public void appendComponent(Object component) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'appendComponent'");
     }
 }
