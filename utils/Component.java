@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import utils.Terminal.RawMode;
 import utils.Terminal.TerminalSize;
 import utils.Terminal.TerminalSize.Size;
 
@@ -83,7 +84,7 @@ public class Component {
         return new int[]{size.rows(), size.cols()};
     }
 
-    public static void enableRawMode() {
+    public static void enableRawModeOld() {
         if (isLive) return;
 
         try {
@@ -106,7 +107,7 @@ public class Component {
         }
     }
 
-    public static void disableRawMode() {
+    public static void disableRawModeOld() {
         if (!isLive) return;
 
         try {
@@ -130,6 +131,16 @@ public class Component {
     }
 
 
+    public static void enableRawMode(){
+        if (isLive) return;
+        RawMode.enable();
+        isLive = true;
+    }
+    public static void disableRawMode(){
+        if (!isLive) return;
+        RawMode.disable();
+        isLive = false;
+    }
 
 
     
