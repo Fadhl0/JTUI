@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets;
  * <li> caution: Cloude Sonnet 5 made this.</li>
  */
 public final class RawMode {
-
+    private static final int ENABLE_VIRTUAL_TERMINAL_INPUT = 0x0200;
     private static final Linker LINKER = Linker.nativeLinker();
     private static final String OS = System.getProperty("os.name").toLowerCase();
     private static final boolean IS_WINDOWS = OS.contains("win");
@@ -88,21 +88,24 @@ public final class RawMode {
         int fd = (int) OPEN.invokeExact(path, O_RDWR);
         if (fd == -1) throw new RuntimeException("open /dev/tty failed");
 
-        MemorySegment cur = unixArena.allocate(TERMIOS_LAYOUT);
-        if ((int) TCGETATTR.invokeExact(fd, cur) != 0) throw new RuntimeException("tcgetattr failed");
+        try {
+            MemorySegment cur = unixArena.allocate(TERMIOS_LAYOUT);
+            if ((int) TCGETATTR.invokeExact(fd, cur) != 0) throw new RuntimeException("tcgetattr failed");
 
-        savedTermios = unixArena.allocate(TERMIOS_LAYOUT);
-        MemorySegment.copy(cur, 0, savedTermios, 0, TERMIOS_LAYOUT.byteSize());
+            savedTermios = unixArena.allocate(TERMIOS_LAYOUT);
+            MemorySegment.copy(cur, 0, savedTermios, 0, TERMIOS_LAYOUT.byteSize());
 
-        int iflag = cur.get(ValueLayout.JAVA_INT, OFF_IFLAG);
-        int lflag = cur.get(ValueLayout.JAVA_INT, OFF_LFLAG);
-        cur.set(ValueLayout.JAVA_INT, OFF_LFLAG, lflag & ~(ECHO | ICANON | ISIG | IEXTEN));
-        cur.set(ValueLayout.JAVA_INT, OFF_IFLAG, iflag & ~(IXON | ICRNL | BRKINT | INPCK | ISTRIP));
-        cur.set(ValueLayout.JAVA_BYTE, OFF_CC + VMIN_IDX, (byte) 0);
-        cur.set(ValueLayout.JAVA_BYTE, OFF_CC + VTIME_IDX, (byte) 1);
+            int iflag = cur.get(ValueLayout.JAVA_INT, OFF_IFLAG);
+            int lflag = cur.get(ValueLayout.JAVA_INT, OFF_LFLAG);
+            cur.set(ValueLayout.JAVA_INT, OFF_LFLAG, lflag & ~(ECHO | ICANON | ISIG | IEXTEN));
+            cur.set(ValueLayout.JAVA_INT, OFF_IFLAG, iflag & ~(IXON | ICRNL | BRKINT | INPCK | ISTRIP));
+            cur.set(ValueLayout.JAVA_BYTE, OFF_CC + VMIN_IDX, (byte) 0);
+            cur.set(ValueLayout.JAVA_BYTE, OFF_CC + VTIME_IDX, (byte) 1);
 
-        if ((int) TCSETATTR.invokeExact(fd, TCSAFLUSH, cur) != 0) throw new RuntimeException("tcsetattr failed");
-        int ignored = (int) CLOSE.invokeExact(fd);
+            if ((int) TCSETATTR.invokeExact(fd, TCSAFLUSH, cur) != 0) throw new RuntimeException("tcsetattr failed");
+        } finally {
+            int ignored = (int) CLOSE.invokeExact(fd); // always runs, mirrors the C fallthrough
+        }
     }
 
     private static void disableUnix() throws Throwable {
@@ -149,9 +152,11 @@ public final class RawMode {
 
     private static MemorySegment openConin(Arena arena) throws Throwable {
         MemorySegment name = arena.allocateFrom("CONIN$", StandardCharsets.UTF_16LE);
-        return (MemorySegment) CREATE_FILE_W.invokeExact(
+        MemorySegment handle = (MemorySegment) CREATE_FILE_W.invokeExact(
                 name, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
                 MemorySegment.NULL, OPEN_EXISTING, 0, MemorySegment.NULL);
+        if (handle.address() == -1L) throw new RuntimeException("CreateFileW(CONIN$) failed"); // INVALID_HANDLE_VALUE
+        return handle;
     }
 
     private static void enableWindows() throws Throwable {
@@ -162,17 +167,20 @@ public final class RawMode {
                 throw new RuntimeException("GetConsoleMode failed");
             savedWinMode = modeOut.get(ValueLayout.JAVA_INT, 0);
 
-            int raw = savedWinMode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT);
-            int r1 = (int) SET_CONSOLE_MODE.invokeExact(handle, raw);
-            int r2 = (int) CLOSE_HANDLE.invokeExact(handle);
+            int raw = (savedWinMode & ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT))
+                    | ENABLE_VIRTUAL_TERMINAL_INPUT; // from issue 1's fix
+            if ((int) SET_CONSOLE_MODE.invokeExact(handle, raw) == 0)
+                throw new RuntimeException("SetConsoleMode failed");
+            int ignoredClose = (int) CLOSE_HANDLE.invokeExact(handle);
         }
     }
 
     private static void disableWindows() throws Throwable {
         try (Arena arena = Arena.ofConfined()) {
             MemorySegment handle = openConin(arena);
-            int r1 = (int) SET_CONSOLE_MODE.invokeExact(handle, savedWinMode);
-            int r2 = (int) CLOSE_HANDLE.invokeExact(handle);
+            if ((int) SET_CONSOLE_MODE.invokeExact(handle, savedWinMode) == 0)
+                throw new RuntimeException("SetConsoleMode restore failed");
+            int ignoredClose = (int) CLOSE_HANDLE.invokeExact(handle);
         }
     }
 }

@@ -377,22 +377,26 @@ public class Input implements TUIComponent {
         OnClick.add(KeyPress.Delete,    () -> { if (active) handleDelete(); });
         OnClick.add(KeyPress.Backspace, () -> { if (active) handleBackspace(); });
 
-        OnClick.add(stop, () -> {
-            if (active && !disableActivation) {
-                buffer.setLength(0);
-                cursor    = 0;
-                scrollOff = 0;
-                active    = false;
-                notifyChange();
-            }
-        });
+        if (stop != null) {
+            OnClick.add(stop, () -> {
+                if (active && !disableActivation) {
+                    buffer.setLength(0);
+                    cursor    = 0;
+                    scrollOff = 0;
+                    active    = false;
+                    notifyChange();
+                }
+            });
+        }
 
-        OnClick.add(start, () -> {
-            if (!active) {
-                active = true;
-                // onStateChange();
-            }
-        });
+        if(start != null) {
+            OnClick.add(start, () -> {
+                if (!active) {
+                    active = true;
+                    // onStateChange();
+                }
+            });
+        }
 
         OnClick.add(KeyPress.Enter, () -> {
             if (active) {

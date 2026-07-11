@@ -31,6 +31,7 @@ public class SelectorTUI extends BaseSelector<SelectorTUI> implements TUICompone
   private int selected = 0;
 
   private boolean invert = false;
+  private boolean isResponsive = false;
 
   public SelectorTUI() {}
   
@@ -80,14 +81,16 @@ public class SelectorTUI extends BaseSelector<SelectorTUI> implements TUICompone
 
   /**
    * Adding box (boxTUI) cover around SelectorTUI
-   * @param shape
+   * @param shape boxShape enum
    * @param activeColor
    * @param inactiveColor
+   * @param isResponsive if true then box will take full width
    */
-  public SelectorTUI wrapInBorder(boxShape shape, String activeColor, String inactiveColor){
+  public SelectorTUI wrapInBorder(boxShape shape, String activeColor, String inactiveColor, boolean isResponsive){
     box = shape;
     activeBorderColor = activeColor;
     inactiveBorderColor = inactiveColor;
+    this.isResponsive = isResponsive;
     return this;
   }
 
@@ -103,6 +106,11 @@ public class SelectorTUI extends BaseSelector<SelectorTUI> implements TUICompone
     if(!box.equals(boxShape.None)) {
       activeBox = new BoxTUI().shape(box).color(activeBorderColor);
       inactiveBox = new BoxTUI().shape(box).color(inactiveBorderColor);
+
+      if (isResponsive) {
+        activeBox.responsive();
+        inactiveBox.responsive();
+      }
     }
   }
 
@@ -221,22 +229,28 @@ public class SelectorTUI extends BaseSelector<SelectorTUI> implements TUICompone
       }
     });
 
-    OnClick.add(start, () -> {
-      if (!active) {
-        active = true;
-        if(!isContainer) options.clearLines(totalLines);
-        selected = selected == -1 ? 0 : selected;
-        render(selected);
-      }
-    });
-    OnClick.add(stop, () -> {
-      if (active && !disableActivation) {
-        active = false;
-        if(!isContainer) options.clearLines(totalLines);
-        // selected = -1;
-        render(selected);
-      }
-    });
+    if (start != null) {
+      OnClick.add(start, () -> {
+        if (!active) {
+          active = true;
+          if(!isContainer) options.clearLines(totalLines);
+          selected = selected == -1 ? 0 : selected;
+          render(selected);
+        }
+      });
+    }
+    
+    if (stop != null) {
+      OnClick.add(stop, () -> {
+        if (active && !disableActivation) {
+          active = false;
+          if(!isContainer) options.clearLines(totalLines);
+          // selected = -1;
+          render(selected);
+        }
+      });
+    }
+
 
     OnClick.add(KeyModifier.CTRL.with('c'), () -> {
       if(!isContainer) {
