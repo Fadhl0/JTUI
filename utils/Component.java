@@ -8,6 +8,10 @@ import java.text.BreakIterator;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import utils.Terminal.TerminalSize;
+import utils.Terminal.TerminalSize.Size;
+
 import java.awt.Desktop;
 
 public class Component {
@@ -46,6 +50,8 @@ public class Component {
         }
     }
 
+
+
     private static Path getBinaryPath(String name) {
         WindowsAPI.apply();
 
@@ -73,25 +79,8 @@ public class Component {
     }
 
     public static int[] getTerminalSize() {
-        try {
-            Process p = new ProcessBuilder(getBinaryPath("termsize").toString()).start();
-
-            String err = new String(p.getErrorStream().readAllBytes()).trim();
-            String out = new String(p.getInputStream().readAllBytes()).trim();
-            p.waitFor();
-
-            if (!err.isEmpty()) {
-                System.err.println("[termsize] " + err);
-            }
-
-            String[] parts = out.split(" ");
-            return new int[]{
-                Integer.parseInt(parts[0]),
-                Integer.parseInt(parts[1])
-            };
-        } catch (Exception e) {
-            return new int[]{24, 80};
-        }
+        Size size = TerminalSize.get();
+        return new int[]{size.rows(), size.cols()};
     }
 
     public static void enableRawMode() {
@@ -140,6 +129,10 @@ public class Component {
         }
     }
 
+
+
+
+    
     public static int visibleLength(String s) {
         String text = removeStyle(s);
         BreakIterator iterator = BreakIterator.getCharacterInstance();
