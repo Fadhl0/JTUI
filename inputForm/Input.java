@@ -203,6 +203,12 @@ public class Input implements TUIComponent {
         return cancelled ? null : buffer.toString();
     }
 
+    public void clearInput() {
+        buffer.setLength(0);
+        cursor = 0;
+        scrollOff = 0;
+    }
+
     private void printInitialLayout() {
         // for (int i = 0; i < WIDGET_HEIGHT; i++) System.out.println();
         linesPrintedLastFrame = 0;
@@ -239,6 +245,8 @@ public class Input implements TUIComponent {
         if (!label.isEmpty()) {
             int labelVisible = Component.visibleLength(label.toString());
             sb.append(box.getTop(label.toString(), totalInner - labelVisible)).append("\n");
+        } else {
+            sb.append(box.getTop(label.toString(), totalInner)).append("\n");
         }
 
         if (prepend != null) sb.append(prepend.get());
@@ -408,6 +416,7 @@ public class Input implements TUIComponent {
                     if (onSubmitCallback != null) {
                         onSubmitCallback.accept(currentText);
                         active = false;          // deactivate after submit
+                        clearInput();
                         // onStateChange();         // re-render in inactive state
                     }
                     if(!isContainer) OnClick.cancel();
