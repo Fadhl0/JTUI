@@ -50,18 +50,22 @@ public class SmartTableTUI implements TUIComponent {
 
   public SmartTableTUI activeColor(String color){ 
     this.activeColor = color;
+    selectors.setActiveColor(color);
     return this;
   }
   public SmartTableTUI inactiveColor(String color){ 
     this.inactiveColor = color;
+    selectors.setInactiveColor(color);
     return this;
   }
   public SmartTableTUI activeColor(Colors color){ 
     this.activeColor = color.getColor();
+    selectors.setActiveColor(color);
     return this;
   }
   public SmartTableTUI inactiveColor(Colors color){ 
     this.inactiveColor = color.getColor();
+    selectors.setInactiveColor(color);
     return this;
   }
   public SmartTableTUI startKey(KeyHandle key) {
