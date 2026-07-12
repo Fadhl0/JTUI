@@ -44,18 +44,32 @@ public final class RawMode {
 
     private static final SymbolLookup LIBC = LINKER.defaultLookup();
 
-    private static final MethodHandle OPEN = LINKER.downcallHandle(
-            LIBC.find("open").orElseThrow(),
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_INT));
-    private static final MethodHandle CLOSE = LINKER.downcallHandle(
-            LIBC.find("close").orElseThrow(),
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT));
-    private static final MethodHandle TCGETATTR = LINKER.downcallHandle(
-            LIBC.find("tcgetattr").orElseThrow(),
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.ADDRESS));
-    private static final MethodHandle TCSETATTR = LINKER.downcallHandle(
-            LIBC.find("tcsetattr").orElseThrow(),
-            FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.ADDRESS));
+    private static final MethodHandle OPEN;
+    private static final MethodHandle CLOSE;
+    private static final MethodHandle TCGETATTR;
+    private static final MethodHandle TCSETATTR;
+
+    static {
+        if (IS_WINDOWS) {
+            OPEN = null;
+            CLOSE = null;
+            TCGETATTR = null;
+            TCSETATTR = null;
+        } else {
+            OPEN = LINKER.downcallHandle(
+                    LIBC.find("open").orElseThrow(),
+                    FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.ADDRESS, ValueLayout.JAVA_INT));
+            CLOSE = LINKER.downcallHandle(
+                    LIBC.find("close").orElseThrow(),
+                    FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT));
+            TCGETATTR = LINKER.downcallHandle(
+                    LIBC.find("tcgetattr").orElseThrow(),
+                    FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.ADDRESS));
+            TCSETATTR = LINKER.downcallHandle(
+                    LIBC.find("tcsetattr").orElseThrow(),
+                    FunctionDescriptor.of(ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.JAVA_INT, ValueLayout.ADDRESS));
+        }
+    }
 
     private static final int NCCS = 32; // glibc Linux
     private static final MemoryLayout TERMIOS_LAYOUT = MemoryLayout.structLayout(
