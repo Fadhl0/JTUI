@@ -32,6 +32,7 @@ import utils.Container;
 import utils.Gradient;
 import utils.Icons;
 import utils.QuoteTUI;
+import utils.SmartTableTUI;
 import utils.SmartTextTUI;
 import utils.TableBox;
 import utils.TableTUI;
@@ -47,11 +48,9 @@ public class App {
                           .setTitle(new TextTUI("Explore The Library:"))
                           .clearAfterSubmit()
                           .limitDisplay(6)
-                        //   .setActiveSelectorIcon("-", "#ff2424")
-                        //   .setInactiveSelectorIcon(" ", "#ffffff")
-                        //   .startActive(false)
                           .onSubmit(select::set)
                           .add("TextTUI")
+                          .add("Smart TextTUI")
                           .add("LogoFonts")
                           .add("Logo Colored")
                           .add("Gradient Color")
@@ -67,9 +66,13 @@ public class App {
                           .add("Tables")
                           .add("Align Text")
                           .add("Container", "replaceable of GUI")
-                          .add("Automation", "Scanner | Selector | Input | Spinner and more");
+                          .add("Automation", "Scanner | Selector | Input | Spinner and more")
+                          ;
                           
         opt.execute();
+
+        Component.clear();
+
         switch (select.get()) {
             case 0:
                 System.out.println(new BadgeTUI().append(new TextTUI("Text Customization").setColor("#3abdff")));
@@ -77,11 +80,14 @@ public class App {
                 TextTUIExample();
                 break;
             case 1:
+                smartTextTUI();
+                break;
+            case 2:
                 System.out.println(new BadgeTUI().append(new TextTUI("All Logo Fonts").setColor("#57ff3a")));
                 System.out.println();
                 LogoFonts();
                 break;
-            case 2:
+            case 3:
                 System.out.println(new BadgeTUI().append(new TextTUI("Logo").setColor("#ea3d46"))
                                                 .append(new TextTUI("Colored").setColor("#ffad3a"))
                                                 .append(new TextTUI("Bee").setColor("#96ff3a"))
@@ -89,7 +95,7 @@ public class App {
                 System.out.println();
                 System.out.println(logoColored());
                 break;
-            case 3:
+            case 4:
                 System.out.println(new BadgeTUI().append(new TextTUI("Gradient color").setColor("#ea543d"))
                                                 .append(new TextTUI("Logo").setColor("#ff3aff"))
                                                 .append(new TextTUI("Bee").setColor("#c73aff"))
@@ -97,123 +103,68 @@ public class App {
                 System.out.println();
                 gradientExample();
                 break;
-            case 4:
+            case 5:
                 System.out.println(new BadgeTUI().append(new TextTUI("Image to Text").setColor("#46d9fe")));
                 System.out.println();
                 System.out.println(imageExample());
                 break;
-            case 5:
+            case 6:
                 System.out.println(new BadgeTUI().append(new TextTUI("Logo With Image").setColor("#ffffff").setBackgroundColor("#9046fe")));
                 System.out.println();
                 logoWithImage();
                 break;
-            case 6:
+            case 7:
                 System.out.println(new BadgeTUI().append(new TextTUI("Box").setColor("#46feb1")));
                 System.out.println();
                 boxExample();
                 break;
-            case 7:
+            case 8:
                 System.out.println(new BadgeTUI().append(new TextTUI("Responsive Box").setColor("#210eb1")));
                 System.out.println();
                 responsiveBox();
                 break;
-            case 8:
+            case 9:
                 tableBoxExample();
                 break;
-            case 9:
+            case 10:
                 System.out.println(new BadgeTUI().append(new TextTUI("Input").setColor("#0b578d")));
                 System.out.println();
                 inputExample();
                 break;
-            case 10:
+            case 11:
                 System.out.println(new BadgeTUI().append(new TextTUI("Selector").setColor("#8d820b")));
                 System.out.println();
                 selectorExample();
                 break;
-            case 11:
+            case 12:
                 System.out.println(new BadgeTUI().append(new TextTUI("Quote").setColor("#032e52")));
                 System.out.println();
                 quoteExample();
                 break;
-            case 12:
+            case 13:
                 System.out.println(new BadgeTUI().append(new TextTUI("Click Event").setColor("#ed4318")));
                 System.out.println();
                 clickExample();
                 break;
-            case 13:
+            case 14:
                 System.out.println(new BadgeTUI().append(new TextTUI("Tables").setColor("#83bd0d")));
                 System.out.println();
                 tableExample();
                 break;
-            case 14:
+            case 15:
                 System.out.println(new BadgeTUI().append(new TextTUI("Align Text").setColor("#bd7a0d")));
                 System.out.println();
                 AlignTextExample();
                 break;
-            case 15:
+            case 16:
                 ContainerExample();
                 break;
-            case 16:
+            case 17:
                 automationExample();
                 break;
             default:
                 break;
         }
-
-
-        // Component.clear();
-        String xml = """
-                <p style=\"Italic Bold\">
-                Hello <br>
-                hi <br>
-                <p>
-                    <span color=\"#f42a2a\">First Span</span>
-                </p>
-                <span>
-                    <p>
-                        <span bg-color=\"#48f42a\">for more Info visit </span>
-                        <a href=\"https://github.com/Fadhl0/JTUI\" color=\"#60ffff\">My Github account <span color="#ff5353">(CTRL + Right-click)</span></a>
-                    </p>
-                </span>
-                hello again
-
-
-                <ul>
-                    <li>Coffee</li>
-                    <li>
-                        nested:
-                        <ul gap="6" icon="◌">
-                            <li>Black tea</li>
-                            <li>Green tea
-                                <ul gap="9" icon="-">
-                                    <li>China</li>
-                                    <li>Africa</li>
-                                </ul>
-                            </li>
-                        </ul>
-                    </li>
-                    <li>Milk</li>
-                </ul>
-
-                <br>
-                <table gap="5">
-                    <tr>
-                        <td color="#f9f948">Month</td>
-                        <td bg-color="#a3a3a3">Savings</td>
-                    </tr>
-                    <tr color="#f95748">
-                        <td>January</td>
-                        <td>$100\n2000$</td>
-                    </tr>
-                    <tr>
-                        <td> </td>
-                        <td>Total</td>
-                    </tr>
-                </table>
-                </p>
-                """;
-        TextTUI t = new SmartTextTUI(xml);
-        System.out.println(t);
         
     }
 
@@ -224,12 +175,12 @@ public class App {
                               .pathway();
         
         TableTUI table1 = new TableTUI();
-        ImageTUI img = new ImageTUI(Paths.get("imgs", "15.png"));
-        LogoTUI text = new LogoTUI("\n\nTyper\n   Java", TUIFont.ANSIShadow)
+        ImageTUI img = new ImageTUI(Paths.get("imgs", "11.png"));
+        LogoTUI text = new LogoTUI("\n\nArtificial\n Stupidity", TUIFont.ANSIShadow)
                             .trim()
                             .setColor("#ffa726")
                             .setShadowColor("#ffcc80")
-                            .setVersion(new TextTUI("version 1.5.8"));
+                            .setVersion(new TextTUI("version 2.0.5"));
 
         table1.addRow(
             new TextTUI(img.toString()),
@@ -238,68 +189,225 @@ public class App {
             )
         );
 
+        String funny = """
+                <root>
+                    <p style="bold">Beep boop! 🤖</p>
+                    <br>
+                    <p>Thank you for your inquiry. As an AI powered by the latest Artificial Stupidity algorithms,</p>
+                    <p>I have processed your complex query through my single remaining data granule and concluded that thinking is hard.</p>
+                    <br>
+                    <p>Therefore, my official answer to your question is: <span style="bold">Yes, no, maybe, and 42.</span></p>
+                    <br>
+                    <p>If this response did not solve your problem, please try asking a human,</p>
+                    <p>or just stare blankly at a wall for five minutes. We will achieve the same results.</p>
+                    <br>
+                    <p style="italic">Have a mathematically average day!</p>
+                </root>
+                """;
+        SmartTextTUI funniestAI = new SmartTextTUI(funny);
 
-        BoxTUI userBox = new BoxTUI()
-                .color("#eab308") // Amber/Gold Border
-                .label(new TextTUI(" CURRENT SESSION ").bold().setColor("#ca8a04"))
-                .innerText(
-                        new TextTUI("\n")
-                            .appendText(new TextTUI("  User:        admin_dev\n").bold().setColor(Colors.Rose500))
-                            .appendText(new TextTUI("  Role:        Superuser\n").setColor(Colors.Rose500))
-                            .appendText(new TextTUI("  Environment: Production\n").setColor(Colors.Blue500))
-                );
+        Container c1 = new Container();
 
-        BoxTUI securityBox = new BoxTUI()
-                .color("#ef4444") // Red Border
-                .label(new TextTUI(" SECURITY LOGS ").bold().setColor("#dc2626"))
-                .innerText(
-                        new TextTUI("\n")
-                            .appendText(new TextTUI("  Last Login:  2026-06-05 21:04\n").setColor(Colors.Blue500))
-                            .appendText(new TextTUI("  IP Address:  192.168.1.45\n").setColor(Colors.Blue500))
-                            .appendText(new TextTUI("  Active SSH:  1 Session\n").setColor(Colors.Blue500))
-                );
+        String descTags = """
+                <root>
+                    <br><br><br>
+                    <p>ensures humanity stays safely at the top of the food chain.</p>
+                    <p>It combines the processing power of millions of servers with</p>
+                    <p>the uncanny ability to confidently lose an argument against a brick wall.</p>
+                    <p style="bold" color="#ffa726">Saves energy by choosing not to think at all.</p>
+                </root>
+                """;
+        SmartTextTUI desc = new SmartTextTUI(descTags);
 
-        TableBox table2 = new TableBox(userBox.responsive(), securityBox.responsive());
+        // append to Container
+        c1.append(title::toString);
+        c1.append(() -> "\n");
+        Object li = c1.append(table1::toString, Alignment.INLINE_CENTER);
+        Object d = c1.append(() -> desc.toString(), Alignment.INLINE_CENTER);
 
-        // AtomicReference<Integer> res = new AtomicReference<>();
-        SelectorTUI selector = new SelectorTUI()
-                                  .setTitle(new TextTUI("What is your favorite color?"))
-                                  .onSubmit(result -> System.out.println(AlignText.bottom("Submit hook: " + result)))
-                                  .limitDisplay(4)
-                                  .wrapInBorder(boxShape.SingleLine, "#ffffff", "#696969")
-                                  .add("Red").add("Orange")
-                                  .add("Green").add("Blue")
-                                  .add("Pink").add("Other");
-
+        AtomicReference<String> res3 = new AtomicReference<>();
         InputTUI input = new InputTUI()
-                        .label(new TextTUI(" Add Text "))
                         .placeholder(new TextTUI("Type something…").setColor("#5f5f5f"))
                         .maxLength(100)
                         .setActiveBorderColor(Colors.setColor("#65ff70"))
                         .setInactiveBorderColor(Colors.setColor("#696969"))
                         .width(-1)
-                        // .startActive(false)
-                        .onChange(result -> {
-                            System.out.println(AlignText.bottom("Change hook: " + result));
+                        .startKey(KeyPress.Space)
+                        // .onChange(result -> {
+                        //     System.out.println(AlignText.bottom("Change hook: " + result));
+                        // })
+                        .onSubmit((s) -> {
+                            if(res3.get() == null) {
+                                c1.remove(li);
+                                c1.remove(d);
+                                c1.append(funniestAI::toString, Alignment.INLINE_CENTER);
+                            }
+                            res3.set(s);
                         })
-                        .onSubmit(result -> System.out.println(AlignText.bottom("Submit hook: " + result)))
-                        .setIcon(new TextTUI(" " + Icons.Search.get() + " ").setColor("#62ff54"));
+                        .clearAfterSubmit()
+                        .setIcon(new TextTUI(" > ").setColor("#62ff54"));
 
         Input in = input.build();
+        
+        c1.appendComponent(in, Alignment.BOTTOM);
+        c1.append(() -> msg(), Alignment.CENTER_BOTTOM);
 
-        Container c1 = new Container();
-        
-        c1.append(title::toString);
-        c1.append(() -> "\n");
-        c1.append(table1::toString, Alignment.INLINE_CENTER);
-        
-        c1.append(() -> "\n");
-        c1.appendComponent(in);
-        c1.appendComponent(selector);
-        c1.append(table2::toString);
+        OnClick.add(KeyModifier.CTRL.with('r'), () -> {
+            c1.stop();
+            Container2();
+        });
         
         c1.execute();
 
+    }
+
+    private static void Container2() {
+
+        Container c = new Container();
+
+        String[] opt1 = new String[]{"Stupid-Llama", "Dumb-E", "Qwen2.5-0.5B", "TinyLlama-1.1B", "Xenomorph", "Civilian"};
+        SelectorTUI selector = new SelectorTUI()
+                                  .setTitle(new TextTUI(" Select the Artificial Stupidity Model ").setColor("#006511"))
+                                  .onSubmit((res) -> System.out.println(AlignText.at(25, 0, "You select: " + opt1[res])))
+                                  .limitDisplay(4)
+                                  .wrapInBorder(boxShape.SingleLine, "#00b14a", "#696969", true)
+                                  .add("Stupid-Llama").add("Dumb-E")
+                                  .add("Qwen2.5-0.5B").add("TinyLlama-1.1B")
+                                  .add("Xenomorph").add("Civilians")
+                                  .setInactiveSelectorIcon(" ", "")
+                                  .setActiveSelectorIcon(">", "#00b14a")
+                                  .startKey(null);
+        
+        String[] opt2 = new String[]{"Low", "Medium", "High", "Max"};
+        SelectorTUI selector2 = new SelectorTUI()
+                                  .setTitle(new TextTUI(" Effort ").setColor("#751600"))
+                                  .onSubmit((res) -> System.out.println(AlignText.at(25, 0, "Effort: " + opt2[res])))
+                                  .wrapInBorder(boxShape.SingleLine, "#ff3f3f", "#696969", true)
+                                  .add("Low").add("Medium")
+                                  .add("High").add("Max")
+                                  .startKey(null);
+                                  
+
+        SmartTableTUI ta = new SmartTableTUI("Name", "Version", "Tap", "Description", "Installs")
+                                .tableRows("grid-commander", "1.4.2", "fadhl/games", "Grid-based real-time strategy game", "1,558")
+                                .tableRows("void-craft", "0.9.5", "fadhl/games", "Space-themed real-time strategy game", "412")
+                                .tableRows("op-vault-sync", "2.1.0", "fadhl/tools", "Command-line helper for 1Password workflows", "3,401")
+                                .tableRows("kube-quick", "0.11.2", "fadhl/tools", "Lightweight cluster management helper", "12,558")
+                                .onSubmit((res) -> System.out.println(AlignText.at(25, 0, "You select index "+res)))
+                                .activeColor("#d9ba7d")
+                                .startKey(null);
+
+        c.appendComponent(selector);
+        c.appendComponent(selector2);
+        c.appendComponent(ta);
+        c.append(() -> msg(), Alignment.CENTER_BOTTOM);
+
+        OnClick.add(KeyModifier.CTRL.with('r'), () -> {
+            c.stop();
+            ContainerExample();
+        });
+        c.execute();
+
+    }
+
+    private static String msg() {
+        String keys = """
+                <root>
+                    <span style="bold" color="#b00000"> CTRL+C</span>
+                    <span> Exit ∙</span>
+                    <span style="bold" color="#82b900"> Tab</span>
+                    <span> Navigate b/w Components ∙</span>
+                    <span style="bold" color="#00b5bf"> Escape</span>
+                    <span> Deactivate Components ∙</span>
+                    <span style="bold" color="#c98600"> Space</span>
+                    <span> Activate Input ∙</span>
+                    <span style="bold" color="#0040c9"> CTRL+R</span>
+                    <span> Navigate b/w Tabs</span>
+                </root>
+                """;
+        SmartTextTUI hotkeys = new SmartTextTUI(keys);
+        return hotkeys.toString();
+    }
+
+    private static void smartTextTUI() {
+        String xml = """
+            <root>
+                <p style="bold" color="#60ffff">=== JTUI Text Rendering Engine Showcase ===</p>
+                
+                <p>
+                    This is a standard paragraph element. Text can be styled easily. 
+                    <br>
+                    You can apply <span style="bold">Bold</span>, <span style="italic">Italic</span>, 
+                    <span style="underline">Underline</span>, <span style="strikethrough">Strikethrough</span>, 
+                    and even <span style="invert">Inverted Text Colors</span>.
+                </p>
+
+                <p>
+                    <span color="#f42a2a" style="bold">Vibrant Foreground Colors</span> can be mixed with 
+                    <span bg-color="#48f42a" color="#000000">Custom Background Badges</span> to make important terminal text pop out.
+                </p>
+
+                <p>
+                    <span style="bold">Interactive Links: </span> 
+                    <a href="https://github.com/Fadhl0/JTUI" color="#60ffff" style="underline">Explore JTUI on GitHub</a>
+                    <span color="#ff5353" style="italic"> (CTRL + Right-click to open)</span>
+                </p>
+
+                <br>
+
+                <p style="bold" color="#f9f948">--- Layout Component: Custom Lists ---</p>
+                <ul>
+                    <li>Standard Bullet Item (Coffee)</li>
+                    <li>Customizable Nested Hierarchies:
+                        <ul gap="4" icon="◌" color="#60ffff">
+                            <li>First Level Nesting (Black tea)</li>
+                            <li>Second Level Nesting (Green tea)
+                                <ul gap="8" icon="-" color="#f42a2a">
+                                    <li>Deep Origin: China</li>
+                                    <li>Deep Origin: Africa</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>Standard Bullet Item (Milk)</li>
+                </ul>
+
+                <br>
+                <br>
+
+                <p style="bold" color="#f9f948">--- Layout Component: Structured Grid Tables ---</p>
+
+                <br>
+
+                <table gap="6">
+                    <tr style="bold">
+                        <td color="#f9f948" style="underline">Month</td>
+                        <td bg-color="#a3a3a3" color="#000000">  Financial Savings  </td>
+                        <td color="#60ffff">Status</td>
+                    </tr>
+                    <tr color="#f95748">
+                        <td>January</td>
+                        <td>$100.00</td>
+                        <td>Pending</td>
+                    </tr>
+                    <tr color="#48f42a">
+                        <td>February</td>
+                        <td>$2,000.00</td>
+                        <td>Cleared</td>
+                    </tr>
+                    <tr style="bold">
+                        <td> </td>
+                        <td style="underline">Total: $2,100.00</td>
+                        <td>Done</td>
+                    </tr>
+                </table>
+                
+                <br>
+                <p color="#a3a3a3" style="italic">End of JTUI Terminal Engine Demonstration.</p>
+            </root>
+            """;
+        SmartTextTUI t = new SmartTextTUI(xml);
+        System.out.println(t);
     }
 
     private static void automationExample() {
@@ -382,7 +490,6 @@ public class App {
                     .onSubmit(result2::set);
 
         Component.clear();
-        System.out.println();
 
         BoxCell summery = new BoxCell()
                             .label(new TextTUI(" Your Info. "))
@@ -393,7 +500,8 @@ public class App {
                                           .setColor("#66b8f7");
                                     });
         
-        Automation.create().appendCell(cell1)
+        Automation.create()
+        .appendCell(cell1)
                            .appendCell(cell5)
                            .appendCell(cell)
                            .appendCell(cell4)
@@ -405,7 +513,6 @@ public class App {
                            .setTitle(new TextTUI(" JTUI ").setBackgroundColor("#f44336"))
                            .start();
 
-        System.out.println();
     }
 
     private static void AlignTextExample() {
@@ -418,15 +525,61 @@ public class App {
 
     private static void tableExample() {
         TableTUI table = new TableTUI();
-        TextTUI header1 = new TextTUI("Student Name").bold();
-        TextTUI header2 = new TextTUI("Student Number").bold();
 
-        table.addRow(header1, header2);
-        table.addRow(new TextTUI("Fadhl Al Fadhili"),
-                     new TextTUI("2363825"));
+        TextTUI h0 = new TextTUI("#").setColor("#ff49b6");
+        TextTUI h1 = new TextTUI("SERVICE NAME").setColor("#8c49ff");
+        TextTUI h2 = new TextTUI("PID").setColor("#494cff");;
+        TextTUI h3 = new TextTUI("CPU %").setColor("#49ff98");;
+        TextTUI h4 = new TextTUI("MEMORY USE").setColor("#f0ff49");;
+        TextTUI h5 = new TextTUI("HEALTH STATUS").bold().setColor("#ff8049");
 
-        table.addRow(new TextTUI("Naif Mohammad Siddiq"),
-                     new TextTUI("2284351"));
+        table.addRow(h0, h1, h2, h3, h4, h5);
+
+        table.addRow(
+            new TextTUI("1"),
+            new TextTUI("Gateway Router"), 
+            new TextTUI("1042"), 
+            new TextTUI("1.2%"), 
+            new TextTUI("142 MB"), 
+            new TextTUI("[ONLINE]")
+        );
+
+        table.addRow(
+            new TextTUI("2"),
+            new TextTUI("Authentication API"), 
+            new TextTUI("3109"), 
+            new TextTUI("14.5%"), 
+            new TextTUI("894 MB"), 
+            new TextTUI("[STABLE]")
+        );
+
+        table.addRow(
+            new TextTUI("3"),
+            new TextTUI("PostgreDB Cluster"), 
+            new TextTUI("0822"), 
+            new TextTUI("42.1%"), 
+            new TextTUI("4102 MB"), 
+            new TextTUI("[HEAVY LOAD]")
+        );
+
+        table.addRow(
+            new TextTUI("4"),
+            new TextTUI("Cache Layer (Redis)"), 
+            new TextTUI("1145"), 
+            new TextTUI("0.0%"), 
+            new TextTUI("64 MB"), 
+            new TextTUI("[IDLE]")
+        );
+
+        table.addRow(
+            new TextTUI(""),
+            new TextTUI("Total Core Services"), 
+            new TextTUI("[4]"), 
+            new TextTUI("57.8%"), 
+            new TextTUI("5202 MB"), 
+            new TextTUI("NOMINAL SYSTEM")
+        );
+
         System.out.println(table);
     }
 
@@ -685,26 +838,49 @@ public class App {
     }
 
     private static void gradientExample(){ 
-        System.out.println(new BadgeTUI().append(new TextTUI("Vertical direction").setColor("#f63e00")).pathway());
-        System.out.println(
-            Gradient.set(logoColored(), "vertical", "#d1f600", "#f63e00")
-        );
+        TableTUI table = new TableTUI();
+        TextTUI[] all = new TextTUI[3];
 
-        System.out.println(new BadgeTUI().append(new TextTUI("Horizontal direction").setColor("#f63e00")).pathway());
-        System.out.println(
-            Gradient.set(logoColored(), "horizontal", "#d1f600", "#f63e00")
-        );
+        all[0] = new TextTUI(
+                new BadgeTUI().append(new TextTUI("Vertical direction").setColor("#f63e00")).pathway()
+                + "\n"
+                + Gradient.set(logoColored(), "vertical", "#d1f600", "#f63e00")
+                + "\n"
+            );
+
+        all[1] = new TextTUI(
+                new BadgeTUI().append(new TextTUI("Horizontal direction").setColor("#f63e00")).pathway()
+                + "\n"
+                + Gradient.set(logoColored(), "horizontal", "#d1f600", "#f63e00")
+                + "\n"
+            );
         
-        System.out.println(new BadgeTUI().append(new TextTUI("Diagonal direction").setColor("#f63e00")).pathway());
-        System.out.println(
-            Gradient.set(logoColored(), "diagonal", "#d1f600", "#f63e00")
-        );
+        all[2] = new TextTUI(
+                new BadgeTUI().append(new TextTUI("Diagonal direction").setColor("#f63e00")).pathway()
+                + "\n"
+                + Gradient.set(logoColored(), "diagonal", "#d1f600", "#f63e00")
+                + "\n"
+            );
+        
+        table.addRow(all);
+
+        System.out.println(table);
     }
 
     private static void LogoFonts() {
+        TableTUI table = new TableTUI();
+        String[] logos = new String[TUIFont.values().length];
+        int index = 0;
         for(TUIFont i : TUIFont.values()) {
-            System.out.println(new LogoTUI("Bee", i).trim() + "\n\n");
+            logos[index] = new LogoTUI("Bee", i).trim() + "\n\n";
+            index++;
         }
+
+        table.addRow(new TextTUI(logos[0]), new TextTUI(logos[1]), new TextTUI(logos[3]));
+        table.addRow(new TextTUI(logos[4]), new TextTUI(logos[5]), new TextTUI(logos[6]));
+        table.addRow(new TextTUI(logos[2]), new TextTUI(logos[9]), new TextTUI(logos[7]));
+        table.addRow(new TextTUI(logos[8]));
+        System.out.println(table);
     }
 
     private static void TextTUIExample() {
