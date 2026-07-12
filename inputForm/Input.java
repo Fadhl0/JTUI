@@ -47,6 +47,7 @@ public class Input implements TUIComponent {
     private KeyHandle start;
     private KeyHandle stop;
     private volatile boolean active = true;
+    private boolean clear;
 
     private Map<Predicate<String>, TextTUI> exceptions = new LinkedHashMap<>();
 
@@ -72,6 +73,7 @@ public class Input implements TUIComponent {
         private TextTUI errorMessage = new TextTUI("Invalid input.");
         private List<Runnable> liveListeners = new ArrayList<>();
         private boolean disableActivation = false;
+        private boolean clear = false;
 
         private Map<Predicate<String>, TextTUI> exceptions = new LinkedHashMap<>();
         
@@ -129,6 +131,12 @@ public class Input implements TUIComponent {
         public InputTUI setActiveBorderColor(Colors borderColor) { this.activeBorderColor = borderColor.getColor(); return this; }
         public InputTUI setInactiveBorderColor(String borderColor) { this.inactiveBorderColor = borderColor; return this; }
         public InputTUI setInactiveBorderColor(Colors borderColor) { this.inactiveBorderColor = borderColor.getColor(); return this; }
+
+        public InputTUI clearAfterSubmit() {
+            clear = true;
+            return this;
+        }
+
         /**
          * Turn on/off stopping key
          * @param status
@@ -166,6 +174,7 @@ public class Input implements TUIComponent {
         stop             = b.stop;
         start            = b.start;
         disableActivation= b.disableActivation;
+        clear            = b.clear;
     }
 
     // private static final int WIDGET_HEIGHT = 3;
@@ -203,7 +212,7 @@ public class Input implements TUIComponent {
         return cancelled ? null : buffer.toString();
     }
 
-    public void clearInput() {
+    private void clearInput() {
         buffer.setLength(0);
         cursor = 0;
         scrollOff = 0;
@@ -242,11 +251,13 @@ public class Input implements TUIComponent {
         boolean none = shape.equals(boxShape.None);
         boxBorder box = active ? activeBox : inactiveBox;
 
-        if (!label.isEmpty()) {
-            int labelVisible = Component.visibleLength(label.toString());
-            sb.append(box.getTop(label.toString(), totalInner - labelVisible)).append("\n");
-        } else {
-            sb.append(box.getTop(label.toString(), totalInner)).append("\n");
+        if (!none) {
+            if (!label.isEmpty()) {
+                int labelVisible = Component.visibleLength(label.toString());
+                sb.append(box.getTop(label.toString(), totalInner - labelVisible)).append("\n");
+            } else {
+                sb.append(box.getTop(label.toString(), totalInner)).append("\n");
+            }
         }
 
         if (prepend != null) sb.append(prepend.get());
@@ -420,7 +431,7 @@ public class Input implements TUIComponent {
                     if (onSubmitCallback != null) {
                         onSubmitCallback.accept(currentText);
                         active = false;          // deactivate after submit
-                        clearInput();
+                        if(clear)clearInput();
                         // onStateChange();         // re-render in inactive state
                     }
                     if(!isContainer) OnClick.cancel();

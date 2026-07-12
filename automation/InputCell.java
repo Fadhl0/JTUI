@@ -153,14 +153,15 @@ public class InputCell implements Cell {
       int placeholderLength = Component.visibleLength(input.getPlaceholder().toString());
       text.innerText(" ".repeat(placeholderLength));
     }
-    TextCell InputCell = new TextCell()
+    TextCell textCell = new TextCell()
                         .setText(new TextTUI(prompt + "\n" + text + " \n"))
                         .setInactiveBorder(inactiveBorder)
                         .setInactiveIcon(inactiveIcon)
                         .setBuffer(buffer);
 
-    InputCell.run();
-    // return InputCell.textAutomation();
+    // FIX: Extract the generated TUI string, print it, and force a flush
+    System.out.print(textCell.textAutomation());
+    System.out.flush();
   }
 
   // InputCell
