@@ -366,6 +366,9 @@ SmartTableTUI table = new SmartTableTUI("Name", "Version", "Tap", "Description",
 table.fire();
 ```
 
+<img width="1000" height="406" alt="SmartTableTUI" src="https://github.com/user-attachments/assets/51571f06-afc9-43bc-92e3-bdf3f9027113" />
+
+
 Defaults to starting on `CTRL+T` and stopping on `Escape` — pass `null` to `.startKey()` if the table is being driven by a `Container` instead of activated on its own. `.activeColor()` / `.inactiveColor()` control the header and row color depending on focus state.
 
 ---
@@ -517,7 +520,8 @@ c.execute();
 
 
 
-https://github.com/user-attachments/assets/7d3f2a75-0ff5-4f30-afe1-88657b578f98
+https://github.com/user-attachments/assets/4b935fe4-9a66-4920-9251-28671f8f0fed
+
 
 
 
