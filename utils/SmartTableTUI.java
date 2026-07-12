@@ -107,14 +107,18 @@ public class SmartTableTUI implements TUIComponent {
     String[] newRow = new String[columns];
     int limit = Math.min(rows.length, columns);
     for (int i = 0; i < limit; i++) {
-        newRow[i] = rows[i].replaceAll("\n", "");
+      newRow[i] = rows[i].replaceAll("\n", "");
     }
     this.rows.add(newRow);
+
+    this.reBuilt = false;
     return this;
   }
 
   private String[] allRows;
   private int addedRowCount = 0;
+  private int lastLength = -1;
+  private boolean reBuilt = false;
 
   private String render() {
     BoxTUI box = new BoxTUI().shape(shape);
@@ -124,9 +128,16 @@ public class SmartTableTUI implements TUIComponent {
     int length = fullWidth ? Component.getTerminalSize()[1] - 1 : Component.visibleLength(allRows[0]);
     sb.append("  " + allRows[0]);
 
-    while (addedRowCount < rows.size() && (addedRowCount + 1) < allRows.length) {
-      selectors.add(Component.visibleText(padding(allRows[addedRowCount + 1], length)));
-      addedRowCount++;
+    if(!reBuilt || length != lastLength){
+      selectors.resetOptions(); 
+      addedRowCount = 0;
+  
+      while (addedRowCount < rows.size() && (addedRowCount + 1) < allRows.length) {
+        selectors.add(Component.visibleText(padding(allRows[addedRowCount + 1], length)));
+        addedRowCount++;
+      }
+      lastLength = length;
+      reBuilt=true;
     }
 
     sb.append(horizontalLine(length-1));
@@ -172,10 +183,15 @@ public class SmartTableTUI implements TUIComponent {
   }
 
   private String padding(String text, int max) {
+    max = max - 5;
     int msgLength = new TextTUI(text).length();
-    int spaceCount = Math.max(0, ((max - 5) - msgLength));
+    if (msgLength > max) {
+      return Component.visibleSubstring(text, 0, max);
+    }
 
+    int spaceCount = Math.max(0, (max - msgLength));
     String padding = " ".repeat(spaceCount);
+
     return text + padding;
   }
 
@@ -197,12 +213,12 @@ public class SmartTableTUI implements TUIComponent {
   @Override public boolean isFocusable() { return true; }
 
   @Override public void onFocus() {
-    activte = true;
     selectors.onFocus();
+    activte = true;
   }
   @Override public void onBlur() {
-    activte = false;
     selectors.onBlur();
+    activte = false;
   }
   @Override public SmartTableTUI startActive(boolean startActive) {
     selectors.startActive(startActive);

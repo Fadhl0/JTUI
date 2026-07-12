@@ -56,4 +56,12 @@ public class OptionSet {
   public void clearLines(int n) {
     for (int i = 0; i < n; i++) System.out.print(TUICursor.CURSOR_UP.toString() + TUICursor.CLEAR_LINE.toString());
   }
+  
+  public void clear() {
+    list.clear();
+    options = new String[0];
+    descs = new String[0];
+    descSpacing = 0;
+    windowStart = 0;
+  }
 }

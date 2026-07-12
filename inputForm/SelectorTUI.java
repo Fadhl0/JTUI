@@ -339,4 +339,14 @@ public class SelectorTUI extends BaseSelector<SelectorTUI> implements TUICompone
     return active;
   }
 
+  /**
+   * Clears existing options and forces the component to recalculate lengths
+   * on the next fire() cycle. Useful for responsive layouts.
+   */
+  public SelectorTUI resetOptions() {
+    this.options.clear(); // Assuming your 'options' object has a clear() method!
+    this.initialized = false;
+    return this;
+  }
+
 }
