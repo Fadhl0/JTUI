@@ -1,12 +1,13 @@
 1. add sort and filter methods to Smart TableTUI
 
-2. window component (at center)
-  - let user costmize it
+2. RawMode does not work in Container perfectlly on windows OS as Unix-based
+
+3. window component (at center)
+  - let user customize it
   - displays error on it
 
-3. shared Terminal width in all Compnents in Container (maximize preformance)
+4. Multi-Tabs or Pages in Container
 
+5. Make Input class supports new line (Shift+Enter)
 
-javac -d bin App.java
-
-java --enable-native-access=ALL-UNNAMED -cp bin App
+6. shared Terminal width in all Compnents in Container (maximize preformance)
