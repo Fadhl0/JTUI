@@ -83,7 +83,7 @@ git clone https://github.com/Fadhl0/JTUI.git
 cd JTUI
 dir /s /B *.java > sources.txt
 javac -d bin @sources.txt
-java -cp bin App
+java --enable-native-access=ALL-UNNAMED -cp bin App
 ```
 
 **Bash / Zsh:**
@@ -93,7 +93,7 @@ git clone https://github.com/Fadhl0/JTUI.git
 cd JTUI
 find . -name "*.java" > sources.txt
 javac -d bin @sources.txt
-java -cp bin App
+java --enable-native-access=ALL-UNNAMED -cp bin App
 ```
 
 ---
