@@ -14,12 +14,14 @@
 - [Getting Started](#getting-started)
 - [Components](#components)
   - [TextTUI](#texttui)
+  - [SmartTextTUI](#smarttexttui)
   - [LogoTUI](#logotui)
   - [Gradient](#gradient)
   - [ImageTUI](#imagetui)
   - [BoxTUI](#boxtui)
   - [TableBox](#tablebox)
   - [TableTUI](#tabletui)
+  - [SmartTableTUI](#smarttabletui)
   - [InputTUI](#inputtui)
   - [SelectorTUI](#selectortui)
   - [QuoteTUI](#quotetui)
@@ -41,11 +43,15 @@
 Originally developed as a Java design patterns course project.
 Not all methods of these classes mentioned in this readme, it is recommend to explore it more in original code.
 
+**Disclaimer**: Windows terminal width detection is supported. The `Container` layout engine is not yet supported on Windows.
+
 ---
 
 ## Features
 
 - **True-color ANSI styling** — foreground, background, bold, italic, underline, strikethrough, invert
+- **XML-based rich text** — write `<p>`, `<span>`, `<a>`, `<ul>`/`<li>`, `<table>`/`<tr>`/`<td>`, and `<br>` markup and render it as styled `TextTUI` output via `SmartTextTUI`
+- **Interactive data tables** — arrow-key-navigable, selectable tables built from raw row data via `SmartTableTUI`
 - **ASCII art logos** — multiple FIGlet-style fonts via `LogoTUI`
 - **Gradient rendering** — vertical, horizontal, and diagonal color gradients over any text
 - **Image to ASCII** — convert PNG images to colored terminal art via `ImageTUI`
@@ -64,13 +70,30 @@ Not all methods of these classes mentioned in this readme, it is recommend to ex
 
 ## Getting Started
 
-JTUI has **no external dependencies**. Clone the repository and compile with any standard Java toolchain (Java 11+).
+JTUI has **no external dependencies**. Clone the repository and compile with a standard Java toolchain.
+
+> **Requires Java 22+.** Java 25 is recommended.
+
+Since the project now spans multiple source directories, compile it by collecting all `.java` files first, then building from that list.
+
+**Windows (cmd):**
+
+```bat
+git clone https://github.com/Fadhl0/JTUI.git
+cd JTUI
+dir /s /B *.java > sources.txt
+javac -d bin @sources.txt
+java --enable-native-access=ALL-UNNAMED -cp bin App
+```
+
+**Bash / Zsh:**
 
 ```bash
 git clone https://github.com/Fadhl0/JTUI.git
-mkdir bin
-javac -d bin App.java
-java -cp bin App
+cd JTUI
+find . -name "*.java" > sources.txt
+javac -d bin @sources.txt
+java --enable-native-access=ALL-UNNAMED -cp bin App
 ```
 
 ---
@@ -92,6 +115,63 @@ System.out.println(new TextTUI("Invert").invert());
 ```
 
 <img width="267" height="210" alt="Pasted image 20260606121627" src="https://github.com/user-attachments/assets/d33d7787-6a45-4444-b58b-80f017329b3b" />
+
+
+---
+
+### SmartTextTUI
+
+Converts XML-style markup into styled `TextTUI` output, so rich text (headings, links, lists, tables) can be authored declaratively instead of chained builder calls. Tags must be wrapped in a single root element.
+
+**Supported tags:**
+
+| Tag | Description |
+|---|---|
+| `<span>` | Inline container used to mark up part of a text |
+| `<p>` | Paragraph; automatically adds a single blank line after each element |
+| `<a>` | Hyperlink, using the `href` attribute |
+| `<ul>` | Unordered list container; supports custom `icon` and `gap` attributes (`icon` sets the bullet, defaults to `•`; `gap` sets left padding, e.g. `gap="2"`) |
+| `<li>` | Unordered list item |
+| `<table>` | Structured grid table; supports a `gap` attribute for column spacing, e.g. `gap="2"` |
+| `<tr>` | Table row container |
+| `<td>` | Table cell |
+| `<br>` | Single line break |
+
+**Supported attributes** (available across all tags): `color` and `bg-color` (hex, e.g. `color="#00a919"`), and `style` (`bold`, `italic`, `underline`, `strikethrough`, `hidden`, `invert` — space separated, e.g. `style="bold italic"`).
+
+```java
+String xml = """
+    <root>
+        <p style="bold" color="#60ffff">=== JTUI Text Rendering Engine ===</p>
+        <p>
+            You can apply <span style="bold">Bold</span>,
+            <span style="italic">Italic</span>, and
+            <span color="#f42a2a">Colored</span> text inline.
+        </p>
+        <a href="https://github.com/Fadhl0/JTUI" color="#60ffff" style="underline">Explore JTUI on GitHub</a>
+        <br>
+        <ul icon="◌" gap="2">
+            <li>First item</li>
+            <li>Second item</li>
+        </ul>
+        <table gap="6">
+            <tr style="bold">
+                <td>Month</td>
+                <td>Status</td>
+            </tr>
+            <tr color="#48f42a">
+                <td>February</td>
+                <td>Cleared</td>
+            </tr>
+        </table>
+    </root>
+    """;
+
+SmartTextTUI t = new SmartTextTUI(xml);
+System.out.println(t);
+```
+
+<img width="1229" height="601" alt="image" src="https://github.com/user-attachments/assets/6b91cad4-e520-489f-bdfd-5b7dda191eb4" />
 
 
 ---
@@ -223,15 +303,16 @@ Places two `BoxTUI` components side by side, splitting the terminal width propor
 
 ```java
 TableBox tb = new TableBox(
-    box.responsive(),
-    new BoxTUI()
-        .label(new TextTUI(" Second Box "))
-        .innerText(new TextTUI("\n  Content here \n"))
-);
+				box.responsive(),
+				new BoxTUI()
+					.label(new TextTUI(" " + Icons.OCR.get() + " Power ").setColor("#a4f94f"))
+					.innerText(new SmartTextTUI(tags))
+					.responsive()
+					.color("#d73030")
+			);
 ```
 
-<img width="911" height="155" alt="Pasted image 20260606130809" src="https://github.com/user-attachments/assets/dd1f5f6a-00ec-4a65-8d68-f2868c55069b" />
-
+<img width="1078" height="191" alt="image" src="https://github.com/user-attachments/assets/af2691c3-d826-452b-b698-d99b0f0ef9fc" />
 
 ---
 
@@ -241,15 +322,54 @@ A simple columnar table for structured data.
 
 ```java
 TableTUI table = new TableTUI();
-table.addRow(new TextTUI("Student Name").bold(), new TextTUI("Student Number").bold());
-table.addRow(new TextTUI("Fadhl Al Fadhili"), new TextTUI("2363825"));
-System.out.println(table);
+
+TextTUI h0 = new TextTUI("#").setColor("#ff49b6");
+TextTUI h1 = new TextTUI("SERVICE NAME").setColor("#8c49ff");
+TextTUI h2 = new TextTUI("PID").setColor("#494cff");;
+TextTUI h3 = new TextTUI("CPU %").setColor("#49ff98");;
+TextTUI h4 = new TextTUI("MEMORY USE").setColor("#f0ff49");;
+TextTUI h5 = new TextTUI("HEALTH STATUS").bold().setColor("#ff8049");
+
+table.addRow(h0, h1, h2, h3, h4, h5);
+
+table.addRow(
+		new TextTUI("1"),
+		new TextTUI("Gateway Router"), 
+		new TextTUI("1042"), 
+		new TextTUI("1.2%"), 
+		new TextTUI("142 MB"), 
+		new TextTUI("[ONLINE]")
+	);
+...
 ```
 
 Column widths are distributed proportionally using the **largest-remainder method**. ANSI escape codes are stripped from length calculations so styled content is always aligned correctly.
 
-<img width="456" height="67" alt="Pasted image 20260606130925" src="https://github.com/user-attachments/assets/617d3ace-805e-4fca-bda9-651dfe7846dd" />
+<img width="804" height="171" alt="image" src="https://github.com/user-attachments/assets/90dee5f0-32ba-4a15-9b90-968adfdd8c7d" />
 
+
+---
+
+### SmartTableTUI
+
+An interactive, arrow-key-navigable table: rows are added as raw string data and the whole table doubles as a selector, returning the index of the chosen row on submit.
+
+```java
+SmartTableTUI table = new SmartTableTUI("Name", "Version", "Tap", "Description", "Installs")
+                          .tableRows("grid-commander", "1.4.2", "fadhl/games", "Grid-based real-time strategy game", "1,558")
+                          .tableRows("void-craft", "0.9.5", "fadhl/games", "Space-themed real-time strategy game", "412")
+                          .tableRows("op-vault-sync", "2.1.0", "fadhl/tools", "Command-line helper for 1Password workflows", "3,401")
+                          .onSubmit(index -> System.out.println("You selected index " + index))
+                          .activeColor("#d9ba7d")
+                          .limitDisplay(4);
+
+table.fire();
+```
+
+<img width="1000" height="406" alt="SmartTableTUI" src="https://github.com/user-attachments/assets/51571f06-afc9-43bc-92e3-bdf3f9027113" />
+
+
+Defaults to starting on `CTRL+T` and stopping on `Escape` — pass `null` to `.startKey()` if the table is being driven by a `Container` instead of activated on its own. `.activeColor()` / `.inactiveColor()` control the header and row color depending on focus state.
 
 ---
 
@@ -290,7 +410,7 @@ SelectorTUI selector = new SelectorTUI()
 int selectedIndex = selector.prompt();
 ```
 
-Returns the zero-based index of the chosen option. Pass `.clearAfterSubmit()` to wipe the selector from the screen after selection.
+Returns the zero-based index of the chosen option.
 
 <img width="400" height="270" alt="3-1" src="https://github.com/user-attachments/assets/a0c7245e-9184-45c4-8d8c-e488994a37bc" />
 
@@ -382,24 +502,26 @@ System.out.println(AlignText.at(6, 2, "Custom Location"));
 A full-screen layout engine with diff-based re-rendering to eliminate flicker. Supports inline content appended with optional alignment.
 
 ```java
-Container c1 = new Container();
+Container c = new Container();
 
-c1.append(title::toString);
-c1.append(() -> "\n");
-c1.append(table1::toString, Alignment.INLINE_CENTER);
-c1.append(inputContainer::prompt);
-c1.append(tableBox::toString);
+InputTUI input = new InputTUI();
+Input in = input.build();
 
-c1.execute();
-// ... interactive phase
-c1.stop();
+c.append(title::toString);
+c.append(() -> "\n");
+c.appendComponent(in, Alignment.BOTTOM);
+c.append(() -> msg(), Alignment.CENTER_BOTTOM);
+
+c.execute();
+
 ```
 
 `Container` uses the **alternate screen buffer** (`\033[?1049h`) so the main scrollback is preserved. Dirty-flag diffing compares lines before repainting, ensuring only changed rows are redrawn.
 
 
 
-https://github.com/user-attachments/assets/7d3f2a75-0ff5-4f30-afe1-88657b578f98
+https://github.com/user-attachments/assets/4b935fe4-9a66-4920-9251-28671f8f0fed
+
 
 
 
@@ -487,6 +609,7 @@ Automation.create()
 | `MultiSelectorCell` | Multi-choice selector with pre-selection                          |
 | `SpinnerCell`       | Animated spinner running an async task with more than 20 spinners |
 | `ScannerCell`       | Vertical scanning animation to text with a task and status update |
+| `BoxCell`	    	  | Renders text dynamically wrapped inside a customizable border     |
 
 
 
@@ -502,7 +625,7 @@ JTUI was designed as a showcase of classical Gang-of-Four and architectural desi
 
 | Pattern | Where Used |
 |---|---|
-| **Builder** | `TextTUI`, `BoxTUI`, `InputTUI`, `SelectorTUI`, `BarTUI`, `QuoteTUI`, `Automation` — all expose fluent builder APIs |
+| **Builder** | `TextTUI`, `BoxTUI`, `InputTUI`, `SelectorTUI`, `SmartTableTUI`, `BarTUI`, `QuoteTUI`, `Automation` — all expose fluent builder APIs |
 | **Strategy** | Border rendering in `BoxTUI` via `boxShape`; alignment strategy in `Container` via `Alignment` enum |
 | **Command** | `OnClick` — each key binding wraps a `Runnable` command dispatched on keypress |
 | **Observer** | `onChange` / `onSubmit` callbacks in `InputCell`, `SelectorCell`, `MultiSelectorCell` |
@@ -513,48 +636,79 @@ JTUI was designed as a showcase of classical Gang-of-Four and architectural desi
 
 ---
 
-## Project Structure ()
+## Project Structure
 
 ```
 src/
-├── App.java                  # Demo entry point
-├── automation/               # Automation wizard engine
-│   ├── Automation.java
-│   ├── Cell.java
-│   ├── InputCell.java
-│   ├── SelectorCell.java
-│   ├── MultiSelectorCell.java
-│   ├── SpinnerCell.java
-│   ├── ScannerCell.java
-│   └── TextCell.java
-├── inputForm/                # Interactive input components
-│   ├── inputTUI/InputTUI.java
-│   ├── InputContainer/Input.java
-│   ├── InputType.java
-│   ├── SelectorTUI.java
-│   ├── boxBorder/BoxTUI.java
-│   └── boxShape.java
-├── Keyhandle/                # Raw mode key event system
-│   ├── OnClick.java
-│   ├── KeyPress.java
-│   ├── KeyHandle.java
-│   └── KeyModifier.java
-├── Text/                     # ASCII art and image rendering
-│   ├── LogoTUI.java
-│   └── ImageTUI.java
-└── utils/                    # Core utilities
-    ├── TextTUI.java
-    ├── Colors.java
-    ├── Component.java
-    ├── Container.java
-    ├── Gradient.java
-    ├── AlignText.java
-    ├── BadgeTUI.java
-    ├── BarTUI.java
-    ├── QuoteTUI.java
-    ├── TableTUI.java
-    ├── TableBox.java
-    └── Icons.java
+├── App
+├── Keyhandle
+│   ├── KeyHandle
+│   ├── KeyModifier
+│   ├── KeyPress
+│   └── OnClick
+│
+├── Text
+│   ├── ImageTUI
+│   ├── LogoTUI
+│   └── fonts
+│       ├── ANSICompact
+│       ├── ANSIRegular
+│       ├── ANSIShadow
+│       ├── ANSISingle
+│       ├── DOS Rebel
+│       ├── Kban
+│       ├── Rectangles
+│       ├── Sub-Zero
+│       ├── Terrace
+│       └── pagga
+│
+├── automation
+│   ├── Automation
+│   ├── AutomationRunner
+│   ├── BoxCell
+│   ├── Cell
+│   ├── InputCell
+│   ├── MultiSelectorCell
+│   ├── ScannerCell
+│   ├── SelectorCell
+│   ├── SpinnerCell
+│   └── TextCell
+│
+├── inputForm
+│   ├── BaseSelector
+│   ├── Input
+│   ├── InputContainer
+│   ├── InputType
+│   ├── OptionSet
+│   ├── SelectorTUI
+│   ├── TUIComponent
+│   ├── TUICursor
+│   ├── boxBorder
+│   └── boxShape
+│
+└── utils
+    ├── ANSI
+    ├── ANSIformat
+    ├── AlignText
+    ├── BadgeTUI
+    ├── BarTUI
+    ├── Colors
+    ├── Component
+    ├── Container
+    ├── ContainerOld
+    ├── Gradient
+    ├── Icons
+    ├── QuoteTUI
+    ├── SmartTableTUI
+    ├── SmartTextTUI
+    ├── Style
+    ├── TableBox
+    ├── TableTUI
+    ├── Terminal
+    │   ├── RawMode
+    │   └── TerminalSize
+    ├── TextTUI
+    └── WindowsAPI
 ```
 
 ---
