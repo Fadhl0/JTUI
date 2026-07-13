@@ -2,7 +2,7 @@
 
 > A zero-dependency Java library for building rich, interactive terminal user interfaces.
 
-<img width="400" height="400" alt="1-1" src="https://github.com/user-attachments/assets/ca291c1c-dcb7-425c-b32b-ee02a019ce1f" />
+https://github.com/user-attachments/assets/4bb77c7f-633b-4046-a34b-59c43e5fb444
 
 
 ---
@@ -33,6 +33,9 @@
   - [Automation](#automation)
 - [Design Patterns](#design-patterns)
 - [Project Structure](#project-structure)
+
+
+<img width="400" height="400" alt="1-1" src="https://github.com/user-attachments/assets/ca291c1c-dcb7-425c-b32b-ee02a019ce1f" />
 
 ---
 
@@ -379,17 +382,17 @@ An interactive text input field with label, placeholder, icon, border color, and
 
 ```java
 InputTUI input = new InputTUI()
-                     .label(new TextTUI(" Enter Your Email ").setColor(Colors.Green600))
-                     .placeholder(new TextTUI("example@company.com").setColor(Colors.Gray500))
-                     .setIcon(new TextTUI(" > ").bold())
-                     .setBorderColor("#8aff0c")
-                     .validator(t -> !t.isEmpty(), new TextTUI("⚠  Empty Field!"))
-                     .validator(
-                         t -> t.contains("@") && t.contains("."),
-                         new TextTUI("⚠  Invalid Email!")
-                     );
+					 .label(new TextTUI(" Enter Your Email ").setColor(Colors.Green600))
+					 .placeholder(new TextTUI("example@company.com").setColor(Colors.Gray500))
+					 .setIcon(new TextTUI(" > ").bold())
+					 .setActiveBorderColor("#8aff0c")
+					 .setInactiveBorderColor(Colors.Gray500)
+					 .validator(t -> !t.isEmpty(), new TextTUI("⚠  Empty Field!"))
+					 .validator(t -> t.contains("@") && t.contains("."),
+								new TextTUI("⚠  Invalid Email!")
+				 );
 
-String result = input.build().prompt();
+String result = input.build().execute();
 ```
 
 <img width="400" height="146" alt="2-1" src="https://github.com/user-attachments/assets/7e8ef33c-91db-43bc-89c8-f093665905f1" />
@@ -402,12 +405,16 @@ String result = input.build().prompt();
 An interactive single-choice selector navigated with arrow keys and confirmed with Enter.
 
 ```java
+AtomicReference<Integer> result = new AtomicReference<>();
 SelectorTUI selector = new SelectorTUI()
-                           .setTitle(new TextTUI("What is your favorite color?"))
-                           .clearAfterSubmit()
-                           .options("Red", "Orange", "Green", "Blue", "Pink", "Other");
+							.setTitle(new TextTUI("What is your favorite color?"))
+							.clearAfterSubmit()
+							.add("Red").add("Orange")
+							.add("Green").add("Blue")
+							.add("Pink").add("Other");
 
-int selectedIndex = selector.prompt();
+selector.execute();
+System.out.println("You select: index " + result.get());
 ```
 
 Returns the zero-based index of the chosen option.
@@ -626,7 +633,7 @@ JTUI was designed as a showcase of classical Gang-of-Four and architectural desi
 | Pattern | Where Used |
 |---|---|
 | **Builder** | `TextTUI`, `BoxTUI`, `InputTUI`, `SelectorTUI`, `SmartTableTUI`, `BarTUI`, `QuoteTUI`, `Automation` — all expose fluent builder APIs |
-| **Strategy** | Border rendering in `BoxTUI` via `boxShape`; alignment strategy in `Container` via `Alignment` enum |
+| **Singleton** | `WindowsAPI` adds ANSI color and UTF-8 support for Windows machines |
 | **Command** | `OnClick` — each key binding wraps a `Runnable` command dispatched on keypress |
 | **Observer** | `onChange` / `onSubmit` callbacks in `InputCell`, `SelectorCell`, `MultiSelectorCell` |
 | **Template Method** | `Cell` base type defines the step lifecycle; concrete cells override task logic |
@@ -677,7 +684,6 @@ src/
 ├── inputForm
 │   ├── BaseSelector
 │   ├── Input
-│   ├── InputContainer
 │   ├── InputType
 │   ├── OptionSet
 │   ├── SelectorTUI
@@ -695,7 +701,6 @@ src/
     ├── Colors
     ├── Component
     ├── Container
-    ├── ContainerOld
     ├── Gradient
     ├── Icons
     ├── QuoteTUI
