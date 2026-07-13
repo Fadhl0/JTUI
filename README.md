@@ -182,13 +182,9 @@ System.out.println(t);
 ### Colors
 Set of best colors for UI design.
 #### All Primary Colors:
-<img width="834" height="497" alt="primary colors" src="https://github.com/user-attachments/assets/2fe1cdc3-d8bf-4116-8127-cb0ab13fd6a0" />
-<br>
 
-#### All Secondary Colors:
+<img width="2560" height="1440" alt="89a4d209-8882-4d80-bce3-7ca0b8b20d44" src="https://github.com/user-attachments/assets/258c963d-25e5-4e33-973b-91120f76e248" />
 
-<img width="1403" height="820" alt="secondary colors" src="https://github.com/user-attachments/assets/2017142f-9233-4f7d-8f8a-6a3f9e40fb71" />
-<img width="860" height="780" alt="secondary colors-1" src="https://github.com/user-attachments/assets/23858d31-a559-41f4-86d5-314d67cc12a8" />
 
 
 
